@@ -3,13 +3,21 @@
 
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="LOWDATAESC — Plataforma de Dados Escalonados com Custódia Inteligente">
-    <title>LOWDATAESC 🇧🇷</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <meta name="description"
+        content="LOWDATAESC — Plataforma de Dados Escalonados com Custódia Inteligente e Fundo CDI">
+    <title>LOWDATAESC | FundInvest ®</title>
     <link
         href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&family=Inter:wght@300;400;500;600;700&display=swap"
         rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
     <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
         :root {
             --bg-primary: #000000;
             --bg-secondary: #030a03;
@@ -23,29 +31,14 @@
             --text-secondary: #88cc88;
             --text-muted: #448844;
             --border-color: #004411;
-            --border-glow: 0 0 10px rgba(0, 255, 65, 0.3);
-            --glow-strong: 0 0 20px rgba(0, 255, 65, 0.5), 0 0 40px rgba(0, 255, 65, 0.2);
             --glow-soft: 0 0 15px rgba(0, 255, 65, 0.3);
-
-            /* ===== GRADIENTS ===== */
+            --glow-strong: 0 0 20px rgba(0, 255, 65, 0.5), 0 0 40px rgba(0, 255, 65, 0.2);
             --gradient-matrix: linear-gradient(135deg, #00ff41, #00cc33, #009922);
-            --gradient-matrix-dark: linear-gradient(135deg, #003311, #001a08, #000000);
             --gradient-br: linear-gradient(135deg, #009c3b, #ffdf00, #002776);
-
-            /* ===== TYPOGRAPHY ===== */
             --font-display: 'Space Grotesk', system-ui, sans-serif;
             --font-mono: 'JetBrains Mono', 'Fira Code', monospace;
-            --font-body: 'Inter', system-ui, sans-serif;
-        }
-
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
-        html {
-            scroll-behavior: smooth;
+            --font-body: 'Inter', sans-serif;
+            --touch-target: 44px;
         }
 
         body {
@@ -53,84 +46,78 @@
             background: var(--bg-primary);
             color: var(--text-primary);
             overflow-x: hidden;
-            line-height: 1.6;
-            position: relative;
+            line-height: 1.5;
+            -webkit-tap-highlight-color: transparent;
         }
 
-        /* ===== MATRIX BACKGROUND EFFECTS ===== */
         body::before {
             content: '';
             position: fixed;
             inset: 0;
-            background:
-                radial-gradient(ellipse at 20% 80%, rgba(0, 255, 65, 0.03) 0%, transparent 50%),
+            background: radial-gradient(ellipse at 20% 80%, rgba(0, 255, 65, 0.03) 0%, transparent 50%),
                 radial-gradient(ellipse at 80% 20%, rgba(0, 255, 65, 0.02) 0%, transparent 50%);
             pointer-events: none;
             z-index: -2;
         }
 
-        /* ===== SCANLINE EFFECT ===== */
         body::after {
             content: '';
             position: fixed;
             inset: 0;
-            background: repeating-linear-gradient(0deg,
-                    rgba(0, 0, 0, 0.1) 0px,
-                    rgba(0, 0, 0, 0.1) 1px,
-                    transparent 1px,
-                    transparent 2px);
+            background: repeating-linear-gradient(0deg, rgba(0, 0, 0, 0.1) 0px, rgba(0, 0, 0, 0.1) 1px, transparent 1px, transparent 2px);
             pointer-events: none;
             z-index: 1000;
-            opacity: 0.3;
+            opacity: 0.2;
         }
 
-        /* ===== SCROLLBAR ===== */
         ::-webkit-scrollbar {
-            width: 8px;
+            width: 6px;
         }
 
         ::-webkit-scrollbar-track {
             background: var(--bg-secondary);
-            border-left: 1px solid var(--border-color);
         }
 
         ::-webkit-scrollbar-thumb {
             background: var(--matrix-green-dim);
             border-radius: 4px;
-            border: 1px solid var(--border-color);
         }
 
-        ::-webkit-scrollbar-thumb:hover {
-            background: var(--matrix-green);
-            box-shadow: var(--glow-soft);
+        button,
+        .btn-primary,
+        .btn-secondary,
+        .nav-cta,
+        .mobile-toggle,
+        .nav-item {
+            cursor: pointer;
+            touch-action: manipulation;
         }
 
-        /* ===== TEXT GLOW UTILITY ===== */
-        .text-glow {
-            text-shadow: 0 0 10px rgba(0, 255, 65, 0.5);
+        .gradient-text {
+            color: var(--matrix-green);
+            text-shadow: 0 0 20px rgba(0, 255, 65, 0.6);
         }
 
         .text-glow-strong {
             text-shadow: 0 0 20px rgba(0, 255, 65, 0.8), 0 0 40px rgba(0, 255, 65, 0.4);
         }
 
-        /* ===== NAVBAR ===== */
         .navbar {
             position: fixed;
             top: 0;
             left: 0;
             right: 0;
             z-index: 1000;
-            padding: 1rem 2rem;
-            background: rgba(0, 10, 0, 0.9);
+            padding: 0.8rem 1.5rem;
+            background: rgba(0, 10, 0, 0.95);
             backdrop-filter: blur(10px);
             border-bottom: 1px solid var(--border-color);
             transition: all 0.3s ease;
         }
 
         .navbar.scrolled {
-            padding: 0.7rem 2rem;
-            background: rgba(0, 5, 0, 0.95);
+            padding: 0.5rem 1.5rem;
+            background: rgba(0, 5, 0, 0.98);
             box-shadow: var(--glow-soft);
         }
 
@@ -140,50 +127,32 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
-        }
-
-        .nav-logo {
-            display: flex;
-            align-items: center;
-            gap: 0.75rem;
-            text-decoration: none;
-        }
-
-        .logo-img {
-            width: 42px;
-            height: 42px;
-            border-radius: 10px;
-            object-fit: cover;
-            border: 2px solid var(--matrix-green);
-            box-shadow: var(--glow-soft);
-            filter: drop-shadow(0 0 5px var(--matrix-green-glow));
+            gap: 1rem;
         }
 
         .logo-text {
             font-family: var(--font-mono);
-            font-size: 1.3rem;
+            font-size: clamp(1.1rem, 5vw, 1.3rem);
             font-weight: 700;
-            letter-spacing: -0.02em;
             color: var(--matrix-green);
             text-shadow: 0 0 10px rgba(0, 255, 65, 0.5);
+            white-space: nowrap;
         }
 
         .logo-badge {
             font-family: var(--font-mono);
-            font-size: 0.7rem;
-            padding: 2px 8px;
+            font-size: 0.65rem;
+            padding: 2px 6px;
             background: var(--gradient-br);
             border-radius: 4px;
-            font-weight: 700;
             color: #fff;
             margin-left: 4px;
-            border: 1px solid rgba(255, 255, 255, 0.2);
         }
 
         .nav-links {
             display: flex;
             align-items: center;
-            gap: 2rem;
+            gap: 1.2rem;
             list-style: none;
         }
 
@@ -191,11 +160,9 @@
             font-family: var(--font-mono);
             color: var(--text-secondary);
             text-decoration: none;
-            font-size: 0.85rem;
-            font-weight: 500;
-            transition: all 0.3s;
-            position: relative;
-            letter-spacing: 0.02em;
+            font-size: 0.8rem;
+            transition: 0.2s;
+            padding: 0.5rem 0;
         }
 
         .nav-links a:hover {
@@ -203,127 +170,62 @@
             text-shadow: 0 0 8px var(--matrix-green-glow);
         }
 
-        .nav-links a::after {
-            content: '';
-            position: absolute;
-            bottom: -4px;
-            left: 0;
-            width: 0;
-            height: 2px;
-            background: var(--gradient-matrix);
-            transition: width 0.3s;
-            border-radius: 1px;
-            box-shadow: 0 0 5px var(--matrix-green-glow);
-        }
-
-        .nav-links a:hover::after {
-            width: 100%;
-        }
-
         .nav-cta {
-            font-family: var(--font-mono) !important;
-            padding: 0.6rem 1.5rem;
+            padding: 0.4rem 1rem;
             background: var(--gradient-matrix);
             color: #000 !important;
             border-radius: 6px;
             font-weight: 700 !important;
-            font-size: 0.8rem !important;
-            transition: all 0.3s !important;
-            border: 1px solid var(--matrix-green);
-            box-shadow: var(--glow-soft);
-        }
-
-        .nav-cta:hover {
-            transform: translateY(-2px);
-            box-shadow: var(--glow-strong);
-            background: var(--matrix-green);
-        }
-
-        .nav-cta::after {
-            display: none !important;
         }
 
         .mobile-toggle {
             display: none;
             flex-direction: column;
-            gap: 5px;
-            cursor: pointer;
+            gap: 4px;
             background: none;
             border: 1px solid var(--border-color);
-            padding: 5px;
-            border-radius: 4px;
+            padding: 6px;
+            border-radius: 6px;
+            width: 36px;
+            height: 36px;
+            justify-content: center;
+            align-items: center;
         }
 
         .mobile-toggle span {
-            width: 25px;
+            width: 20px;
             height: 2px;
             background: var(--matrix-green);
-            border-radius: 2px;
-            transition: all 0.3s;
-            box-shadow: 0 0 5px var(--matrix-green-glow);
+            display: block;
         }
 
-        /* ===== HERO ===== */
         .hero {
             min-height: 100vh;
             display: flex;
             align-items: center;
             justify-content: center;
-            position: relative;
-            padding: 8rem 2rem 4rem;
-            overflow: hidden;
-        }
-
-        .hero-bg {
-            position: absolute;
-            inset: 0;
-            z-index: 0;
-        }
-
-        /* Matrix code rain canvas */
-        #matrix-canvas {
-            position: absolute;
-            inset: 0;
-            width: 100%;
-            height: 100%;
-            z-index: 0;
-            opacity: 0.15;
-        }
-
-        .grid-overlay {
-            position: absolute;
-            inset: 0;
-            background-image:
-                linear-gradient(rgba(0, 68, 17, 0.4) 1px, transparent 1px),
-                linear-gradient(90deg, rgba(0, 68, 17, 0.4) 1px, transparent 1px);
-            background-size: 40px 40px;
-            mask-image: radial-gradient(ellipse at center, black 20%, transparent 70%);
-            -webkit-mask-image: radial-gradient(ellipse at center, black 20%, transparent 70%);
-            z-index: 1;
+            padding: 6rem 1.5rem 3rem;
+            text-align: center;
         }
 
         .hero-content {
-            position: relative;
-            z-index: 2;
             max-width: 900px;
-            text-align: center;
+            width: 100%;
         }
 
         .hero-badge {
             display: inline-flex;
             align-items: center;
             gap: 0.5rem;
-            padding: 0.5rem 1.2rem;
+            padding: 0.4rem 1rem;
             background: var(--matrix-green-soft);
             border: 1px solid rgba(0, 255, 65, 0.3);
             border-radius: 50px;
             font-family: var(--font-mono);
-            font-size: 0.75rem;
+            font-size: 0.7rem;
             font-weight: 600;
             color: var(--matrix-green);
-            margin-bottom: 2rem;
-            animation: fadeInUp 0.8s ease;
-            box-shadow: var(--glow-soft);
+            margin-bottom: 1.5rem;
         }
 
         .hero-badge .pulse {
@@ -332,7 +234,6 @@
             background: var(--matrix-green);
             border-radius: 50%;
             animation: pulse 2s infinite;
-            box-shadow: 0 0 10px var(--matrix-green);
         }
 
         @keyframes pulse {
@@ -341,162 +242,107 @@
             100% {
                 opacity: 1;
                 transform: scale(1);
-                box-shadow: 0 0 10px var(--matrix-green);
             }
 
             50% {
                 opacity: 0.6;
                 transform: scale(1.3);
-                box-shadow: 0 0 20px var(--matrix-green);
             }
         }
 
         .hero-title {
             font-family: var(--font-display);
-            font-size: clamp(2.5rem, 6vw, 4.5rem);
+            font-size: clamp(2rem, 7vw, 4rem);
             font-weight: 700;
-            line-height: 1.1;
-            letter-spacing: -0.03em;
-            margin-bottom: 1.5rem;
-            animation: fadeInUp 0.8s ease 0.1s both;
-        }
-
-        .hero-title .gradient-text {
-            color: var(--matrix-green);
-            text-shadow: 0 0 20px rgba(0, 255, 65, 0.6), 0 0 40px rgba(0, 255, 65, 0.3);
-        }
-
-        .hero-title .br-flag {
-            font-size: 0.6em;
-            vertical-align: super;
-            margin-left: 4px;
+            line-height: 1.2;
+            margin-bottom: 1rem;
         }
 
         .hero-subtitle {
-            font-size: clamp(1rem, 2vw, 1.2rem);
+            font-size: clamp(0.9rem, 3vw, 1.1rem);
             color: var(--text-secondary);
             max-width: 650px;
-            margin: 0 auto 2.5rem;
-            line-height: 1.7;
-            animation: fadeInUp 0.8s ease 0.2s both;
+            margin: 0 auto 1.5rem;
         }
 
         .hero-actions {
             display: flex;
+            gap: 1rem;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .btn-primary,
+        .btn-secondary {
+            display: inline-flex;
+            padding: 0.8rem 1.8rem;
+            border-radius: 8px;
+            font-family: var(--font-mono);
+            font-weight: 700;
+            text-decoration: none;
+            transition: 0.2s;
+            font-size: 0.9rem;
+            min-height: var(--touch-target);
             align-items: center;
             justify-content: center;
-            gap: 1rem;
-            flex-wrap: wrap;
-            animation: fadeInUp 0.8s ease 0.3s both;
         }
 
         .btn-primary {
-            display: inline-flex;
-            align-items: center;
-            gap: 0.5rem;
-            padding: 1rem 2.5rem;
             background: var(--gradient-matrix);
             color: #000;
-            font-family: var(--font-mono);
-            font-weight: 700;
-            font-size: 0.95rem;
             border: 1px solid var(--matrix-green);
-            border-radius: 8px;
-            cursor: pointer;
-            transition: all 0.3s;
-            text-decoration: none;
             box-shadow: var(--glow-soft);
         }
 
         .btn-primary:hover {
-            transform: translateY(-3px);
+            transform: translateY(-2px);
             box-shadow: var(--glow-strong);
-            background: var(--matrix-green);
         }
 
         .btn-secondary {
-            display: inline-flex;
-            align-items: center;
-            gap: 0.5rem;
-            padding: 1rem 2.5rem;
             background: transparent;
             color: var(--matrix-green);
-            font-family: var(--font-mono);
-            font-weight: 600;
-            font-size: 0.95rem;
             border: 1px solid var(--border-color);
-            border-radius: 8px;
-            cursor: pointer;
-            transition: all 0.3s;
-            text-decoration: none;
         }
 
         .btn-secondary:hover {
             border-color: var(--matrix-green);
             background: var(--matrix-green-soft);
-            transform: translateY(-3px);
-            box-shadow: var(--glow-soft);
-            text-shadow: 0 0 8px var(--matrix-green-glow);
         }
 
         .hero-stats {
             display: flex;
-            justify-content: center;
-            gap: 1.5rem;
-            margin-top: 4rem;
-            animation: fadeInUp 0.8s ease 0.4s both;
             flex-wrap: wrap;
+            justify-content: center;
+            gap: 1rem;
+            margin-top: 3rem;
         }
 
         .stat-item {
             text-align: center;
-            min-width: 110px;
-            padding: 0.75rem;
+            min-width: 90px;
+            padding: 0.6rem;
             background: var(--bg-card);
             border: 1px solid var(--border-color);
-            border-radius: 8px;
-            transition: all 0.3s;
-        }
-
-        .stat-item:hover {
-            border-color: var(--matrix-green);
-            box-shadow: var(--glow-soft);
-            transform: translateY(-2px);
+            border-radius: 10px;
         }
 
         .stat-number {
             font-family: var(--font-mono);
-            font-size: 1.6rem;
+            font-size: 1.2rem;
             font-weight: 700;
             color: var(--matrix-green);
-            text-shadow: 0 0 10px var(--matrix-green-glow);
         }
 
         .stat-label {
             font-family: var(--font-mono);
-            font-size: 0.7rem;
+            font-size: 0.6rem;
             color: var(--text-muted);
-            text-transform: uppercase;
-            letter-spacing: 0.15em;
-            margin-top: 0.25rem;
+            letter-spacing: 0.1em;
         }
 
-        @keyframes fadeInUp {
-            from {
-                opacity: 0;
-                transform: translateY(30px);
-            }
-
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-
-        /* ===== SECTION COMMON ===== */
         section {
-            padding: 6rem 2rem;
-            position: relative;
+            padding: 4rem 1.5rem;
         }
 
         .container {
@@ -510,8 +356,6 @@
             gap: 0.5rem;
             font-family: var(--font-mono);
             font-size: 0.7rem;
-            font-weight: 700;
-            text-transform: uppercase;
             letter-spacing: 0.2em;
             color: var(--matrix-green);
             margin-bottom: 1rem;
@@ -522,196 +366,64 @@
             width: 30px;
             height: 2px;
             background: var(--gradient-matrix);
-            border-radius: 1px;
-            box-shadow: 0 0 5px var(--matrix-green-glow);
         }
 
         .section-title {
             font-family: var(--font-display);
-            font-size: clamp(2rem, 4vw, 3rem);
+            font-size: clamp(1.8rem, 5vw, 2.5rem);
             font-weight: 700;
-            letter-spacing: -0.02em;
-            line-height: 1.2;
-            margin-bottom: 1rem;
+            margin-bottom: 0.5rem;
         }
 
-        .section-title .gradient-text {
-            color: var(--matrix-green);
-            text-shadow: 0 0 15px rgba(0, 255, 65, 0.5);
-        }
-
-        .section-subtitle {
-            font-size: 1.1rem;
-            color: var(--text-secondary);
-            max-width: 600px;
-            line-height: 1.7;
-        }
-
-        /* ===== FEATURES ===== */
-        .features {
-            background: var(--bg-secondary);
-        }
-
-        .features-header {
-            text-align: center;
-            margin-bottom: 4rem;
-        }
-
-        .features-header .section-subtitle {
-            margin: 0 auto;
-        }
-
-        .features-grid {
+        .features-grid,
+        .arch-grid,
+        .diff-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
-            gap: 1.5rem;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 1.2rem;
         }
 
-        .feature-card {
+        .feature-card,
+        .arch-card,
+        .diff-item {
             background: var(--bg-card);
             border: 1px solid var(--border-color);
-            border-radius: 12px;
-            padding: 2rem;
-            transition: all 0.4s ease;
-            position: relative;
-            overflow: hidden;
+            border-radius: 16px;
+            padding: 1.5rem;
+            transition: 0.2s;
         }
 
-        .feature-card::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            height: 2px;
-            background: var(--gradient-matrix);
-            opacity: 0;
-            transition: opacity 0.4s;
-        }
-
-        .feature-card:hover {
-            transform: translateY(-5px);
+        .feature-card:hover,
+        .arch-card:hover,
+        .diff-item:hover {
             border-color: var(--matrix-green);
-            background: var(--bg-card-hover);
-            box-shadow: var(--glow-strong);
-        }
-
-        .feature-card:hover::before {
-            opacity: 1;
-        }
-
-        .feature-icon {
-            width: 52px;
-            height: 52px;
-            border-radius: 12px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 1.4rem;
-            margin-bottom: 1.25rem;
-            position: relative;
-            border: 1px solid var(--border-color);
-        }
-
-        .feature-icon.blue {
-            background: rgba(0, 255, 65, 0.08);
-            color: var(--matrix-green);
-            border-color: rgba(0, 255, 65, 0.2);
-        }
-
-        .feature-icon.cyan {
-            background: rgba(0, 255, 65, 0.08);
-            color: var(--matrix-green);
-            border-color: rgba(0, 255, 65, 0.2);
-        }
-
-        .feature-icon.purple {
-            background: rgba(0, 255, 65, 0.08);
-            color: var(--matrix-green);
-            border-color: rgba(0, 255, 65, 0.2);
-        }
-
-        .feature-icon.green {
-            background: rgba(0, 255, 65, 0.08);
-            color: var(--matrix-green);
-            border-color: rgba(0, 255, 65, 0.2);
-        }
-
-        .feature-icon.gold {
-            background: rgba(0, 255, 65, 0.08);
-            color: var(--matrix-green);
-            border-color: rgba(0, 255, 65, 0.2);
-        }
-
-        .feature-card h3 {
-            font-family: var(--font-display);
-            font-size: 1.15rem;
-            font-weight: 600;
-            margin-bottom: 0.75rem;
-            color: var(--text-primary);
-        }
-
-        .feature-card p {
-            color: var(--text-secondary);
-            font-size: 0.9rem;
-            line-height: 1.7;
-        }
-
-        .partner-badge {
-            display: inline-flex;
-            align-items: center;
-            gap: 0.4rem;
-            padding: 0.3rem 0.75rem;
-            background: rgba(245, 223, 0, 0.1);
-            border: 1px solid rgba(245, 223, 0, 0.3);
-            border-radius: 6px;
-            font-family: var(--font-mono);
-            font-size: 0.7rem;
-            color: #ffdf00;
-            font-weight: 600;
-            margin-top: 0.75rem;
-        }
-
-        /* ===== SECURITY LAYERS ===== */
-        .security {
-            position: relative;
-        }
-
-        .security-header {
-            text-align: center;
-            margin-bottom: 4rem;
-        }
-
-        .security-header .section-subtitle {
-            margin: 0 auto;
+            transform: translateY(-4px);
+            box-shadow: var(--glow-soft);
         }
 
         .layers-timeline {
-            position: relative;
             max-width: 800px;
             margin: 0 auto;
+            position: relative;
         }
 
         .layers-timeline::before {
             content: '';
             position: absolute;
-            left: 30px;
+            left: 28px;
             top: 0;
             bottom: 0;
             width: 2px;
             background: var(--gradient-matrix);
-            border-radius: 1px;
-            box-shadow: 0 0 10px var(--matrix-green-glow);
         }
 
         .layer-item {
             display: flex;
-            gap: 2rem;
-            margin-bottom: 2.5rem;
-            position: relative;
+            gap: 1.2rem;
+            margin-bottom: 2rem;
             opacity: 0;
-            transform: translateX(-30px);
-            transition: all 0.6s ease;
+            transform: translateX(-20px);
+            transition: all 0.5s ease;
         }
 
         .layer-item.visible {
@@ -724,334 +436,78 @@
             height: 56px;
             min-width: 56px;
             border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-family: var(--font-mono);
-            font-weight: 700;
-            font-size: 1rem;
-            position: relative;
-            z-index: 2;
             border: 2px solid var(--matrix-green);
             background: var(--bg-card);
             color: var(--matrix-green);
-            box-shadow: var(--glow-soft);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
         }
 
         .layer-content {
             background: var(--bg-card);
             border: 1px solid var(--border-color);
-            border-radius: 12px;
-            padding: 1.75rem;
+            border-radius: 16px;
+            padding: 1.2rem;
             flex: 1;
-            transition: all 0.3s;
-        }
-
-        .layer-content:hover {
-            border-color: var(--matrix-green);
-            background: var(--bg-card-hover);
-            box-shadow: var(--glow-soft);
-        }
-
-        .layer-content h3 {
-            font-family: var(--font-display);
-            font-size: 1.1rem;
-            font-weight: 600;
-            margin-bottom: 0.5rem;
-            color: var(--text-primary);
-        }
-
-        .layer-content p {
-            color: var(--text-secondary);
-            font-size: 0.9rem;
-            line-height: 1.7;
-            margin-bottom: 1rem;
-        }
-
-        .layer-tags {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 0.5rem;
         }
 
         .layer-tag {
-            font-family: var(--font-mono);
-            padding: 0.3rem 0.75rem;
+            display: inline-block;
+            padding: 0.2rem 0.5rem;
             background: var(--matrix-green-soft);
-            border: 1px solid rgba(0, 255, 65, 0.2);
             border-radius: 6px;
-            font-size: 0.7rem;
-            color: var(--matrix-green-dim);
-            font-weight: 500;
-            transition: all 0.3s;
-        }
-
-        .layer-tag:hover {
-            background: rgba(0, 255, 65, 0.15);
-            border-color: var(--matrix-green);
-            color: var(--matrix-green);
-            box-shadow: 0 0 8px var(--matrix-green-glow);
-        }
-
-        .layer-tag.partner {
-            background: rgba(245, 223, 0, 0.1);
-            border-color: rgba(245, 223, 0, 0.3);
-            color: #ffdf00;
-        }
-
-        /* ===== FLOW ===== */
-        .flow {
-            background: var(--bg-secondary);
-        }
-
-        .flow-header {
-            text-align: center;
-            margin-bottom: 4rem;
-        }
-
-        .flow-header .section-subtitle {
-            margin: 0 auto;
+            font-size: 0.65rem;
+            margin: 0.2rem;
         }
 
         .flow-steps {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-            gap: 1rem;
-            position: relative;
+            grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+            gap: 0.8rem;
         }
 
         .flow-step {
             background: var(--bg-card);
             border: 1px solid var(--border-color);
-            border-radius: 12px;
-            padding: 1.5rem;
+            border-radius: 14px;
+            padding: 1rem;
             text-align: center;
-            position: relative;
-            transition: all 0.3s;
-        }
-
-        .flow-step:hover {
-            transform: translateY(-5px);
-            border-color: var(--matrix-green);
-            box-shadow: var(--glow-strong);
         }
 
         .step-number {
-            width: 34px;
-            height: 34px;
+            width: 32px;
+            height: 32px;
             background: var(--gradient-matrix);
             border-radius: 50%;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-family: var(--font-mono);
+            margin: 0 auto 0.6rem;
             font-weight: 700;
-            font-size: 0.8rem;
             color: #000;
-            margin: 0 auto 1rem;
-            border: 1px solid var(--matrix-green);
-        }
-
-        .flow-step h4 {
-            font-family: var(--font-display);
-            font-size: 0.9rem;
-            font-weight: 600;
-            margin-bottom: 0.5rem;
-            color: var(--text-primary);
-        }
-
-        .flow-step p {
-            font-family: var(--font-mono);
-            font-size: 0.75rem;
-            color: var(--text-muted);
-            line-height: 1.5;
-        }
-
-        /* ===== ARCHITECTURE ===== */
-        .architecture {
-            position: relative;
-        }
-
-        .arch-header {
-            text-align: center;
-            margin-bottom: 4rem;
-        }
-
-        .arch-header .section-subtitle {
-            margin: 0 auto;
-        }
-
-        .arch-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
-            gap: 1.5rem;
-        }
-
-        .arch-card {
-            background: var(--bg-card);
-            border: 1px solid var(--border-color);
-            border-radius: 12px;
-            padding: 1.75rem;
-            transition: all 0.3s;
-        }
-
-        .arch-card:hover {
-            border-color: var(--matrix-green);
-            transform: translateY(-3px);
-            box-shadow: var(--glow-soft);
-        }
-
-        .arch-card-label {
-            font-family: var(--font-mono);
-            font-size: 0.65rem;
-            font-weight: 700;
-            text-transform: uppercase;
-            letter-spacing: 0.2em;
-            color: var(--matrix-green);
-            margin-bottom: 1rem;
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-        }
-
-        .arch-card-label .dot {
-            width: 6px;
-            height: 6px;
-            border-radius: 50%;
-            background: var(--matrix-green);
-            box-shadow: 0 0 5px var(--matrix-green-glow);
-        }
-
-        .tech-list {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 0.5rem;
-        }
-
-        .tech-tag {
-            font-family: var(--font-mono);
-            padding: 0.4rem 0.85rem;
-            background: var(--matrix-green-soft);
-            border: 1px solid rgba(0, 255, 65, 0.2);
-            border-radius: 6px;
-            font-size: 0.75rem;
-            font-weight: 500;
-            color: var(--matrix-green-dim);
-            transition: all 0.3s;
-        }
-
-        .tech-tag:hover {
-            background: rgba(0, 255, 65, 0.15);
-            border-color: var(--matrix-green);
-            color: var(--matrix-green);
-            box-shadow: 0 0 8px var(--matrix-green-glow);
-        }
-
-        /* ===== COMPLIANCE ===== */
-        .compliance {
-            background: var(--bg-secondary);
-        }
-
-        .compliance-header {
-            text-align: center;
-            margin-bottom: 4rem;
-        }
-
-        .compliance-header .section-subtitle {
-            margin: 0 auto;
         }
 
         .compliance-badges {
             display: flex;
-            justify-content: center;
             flex-wrap: wrap;
-            gap: 1.5rem;
+            justify-content: center;
+            gap: 1rem;
         }
 
         .compliance-badge {
-            display: flex;
-            align-items: center;
-            gap: 0.75rem;
-            padding: 1rem 1.75rem;
             background: var(--bg-card);
             border: 1px solid var(--border-color);
-            border-radius: 12px;
-            transition: all 0.3s;
-        }
-
-        .compliance-badge:hover {
-            border-color: var(--matrix-green);
-            transform: translateY(-3px);
-            box-shadow: var(--glow-soft);
-        }
-
-        .compliance-badge .badge-icon {
-            width: 40px;
-            height: 40px;
-            background: var(--matrix-green-soft);
-            border: 1px solid rgba(0, 255, 65, 0.3);
-            border-radius: 10px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 1.2rem;
-            color: var(--matrix-green);
-        }
-
-        .compliance-badge .badge-text {
-            font-family: var(--font-display);
-            font-weight: 600;
-            font-size: 0.95rem;
-            color: var(--text-primary);
-        }
-
-        .compliance-badge .badge-sub {
-            font-family: var(--font-mono);
-            font-size: 0.7rem;
-            color: var(--text-muted);
-        }
-
-        /* ===== DIFFERENTIALS ===== */
-        .differentials {
-            position: relative;
-        }
-
-        .diff-header {
-            text-align: center;
-            margin-bottom: 4rem;
-        }
-
-        .diff-header .section-subtitle {
-            margin: 0 auto;
-        }
-
-        .diff-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(270px, 1fr));
-            gap: 1.25rem;
-        }
-
-        .diff-item {
-            display: flex;
-            align-items: flex-start;
-            gap: 1rem;
-            padding: 1.5rem;
-            background: var(--bg-card);
-            border: 1px solid var(--border-color);
-            border-radius: 12px;
-            transition: all 0.3s;
-        }
-
-        .diff-item:hover {
-            border-color: var(--matrix-green);
-            background: var(--bg-card-hover);
-            box-shadow: var(--glow-soft);
+            border-radius: 40px;
+            padding: 0.6rem 1.2rem;
+            font-size: 0.85rem;
         }
 
         .diff-check {
-            width: 26px;
-            height: 26px;
-            min-width: 26px;
+            width: 24px;
+            height: 24px;
+            min-width: 24px;
             background: var(--matrix-green-soft);
             border: 1px solid var(--matrix-green);
             border-radius: 50%;
@@ -1059,332 +515,318 @@
             align-items: center;
             justify-content: center;
             color: var(--matrix-green);
-            font-family: var(--font-mono);
-            font-size: 0.8rem;
-            margin-top: 2px;
-            box-shadow: 0 0 8px var(--matrix-green-glow);
+            font-size: 0.7rem;
         }
 
-        .diff-item h4 {
-            font-family: var(--font-display);
-            font-size: 0.95rem;
-            font-weight: 600;
-            margin-bottom: 0.25rem;
-            color: var(--text-primary);
-        }
-
-        .diff-item p {
-            font-family: var(--font-mono);
-            font-size: 0.8rem;
-            color: var(--text-muted);
-            line-height: 1.5;
-        }
-
+        .partner-badge,
         .diff-partner {
-            font-family: var(--font-mono);
-            font-size: 0.65rem;
-            color: #ffdf00;
-            font-weight: 600;
-            margin-left: 0.5rem;
-            padding: 2px 6px;
             background: rgba(245, 223, 0, 0.1);
-            border-radius: 4px;
-        }
-
-        /* ===== RESTRICTION NOTICE ===== */
-        .restriction-banner {
-            background: linear-gradient(135deg, rgba(0, 68, 17, 0.3), rgba(0, 34, 8, 0.5));
-            border: 1px solid rgba(0, 255, 65, 0.3);
-            border-radius: 12px;
-            padding: 1.5rem;
-            margin: 2rem auto;
-            max-width: 800px;
-            text-align: center;
-            box-shadow: var(--glow-soft);
-        }
-
-        .restriction-banner .icon {
-            font-size: 1.5rem;
-            margin-bottom: 0.5rem;
-            color: var(--matrix-green);
-        }
-
-        .restriction-banner h4 {
-            font-family: var(--font-display);
+            border: 1px solid rgba(245, 223, 0, 0.3);
+            color: #ffdf00;
+            padding: 0.2rem 0.5rem;
+            border-radius: 6px;
+            font-size: 0.65rem;
             font-weight: 600;
-            margin-bottom: 0.5rem;
-            color: var(--matrix-green);
         }
 
-        .restriction-banner p {
-            font-family: var(--font-mono);
-            font-size: 0.85rem;
-            color: var(--text-secondary);
-        }
-
-        /* ===== CTA ===== */
-        .cta {
-            padding: 8rem 2rem;
-            text-align: center;
-            position: relative;
-            overflow: hidden;
+        .fund-dashboard {
             background: var(--bg-secondary);
+            border-top: 1px solid var(--border-color);
+            border-bottom: 1px solid var(--border-color);
+            padding: 2rem 1rem;
         }
 
-        .cta-bg {
-            position: absolute;
-            inset: 0;
-            background: radial-gradient(ellipse at center, rgba(0, 255, 65, 0.05) 0%, transparent 60%);
-        }
-
-        .cta-content {
-            position: relative;
-            z-index: 1;
-            max-width: 700px;
+        .dashboard-container {
+            max-width: 1300px;
             margin: 0 auto;
         }
 
-        .cta-title {
-            font-family: var(--font-display);
-            font-size: clamp(2rem, 4vw, 3rem);
-            font-weight: 700;
-            letter-spacing: -0.02em;
-            margin-bottom: 1rem;
+        .stats-grid-dash {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            margin: 1.5rem 0;
         }
 
-        .cta-title .gradient-text {
-            color: var(--matrix-green);
-            text-shadow: 0 0 15px rgba(0, 255, 65, 0.5);
-        }
-
-        .cta-subtitle {
-            font-size: 1.1rem;
-            color: var(--text-secondary);
-            margin-bottom: 2.5rem;
-            line-height: 1.7;
-        }
-
-        .cta-form {
-            display: flex;
-            gap: 0.75rem;
-            max-width: 500px;
-            margin: 0 auto 1.5rem;
-            flex-wrap: wrap;
-            justify-content: center;
-        }
-
-        .cta-form input,
-        .cta-form select {
-            font-family: var(--font-mono);
-            padding: 0.9rem 1.25rem;
+        .stat-card-dash {
             background: var(--bg-card);
             border: 1px solid var(--border-color);
-            border-radius: 8px;
-            color: var(--text-primary);
-            font-size: 0.9rem;
-            outline: none;
-            transition: all 0.3s;
+            border-radius: 20px;
+            padding: 1rem;
         }
 
-        .cta-form input::placeholder,
-        .cta-form select {
+        .stat-label-dash {
+            font-family: var(--font-mono);
+            font-size: 0.65rem;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
             color: var(--text-muted);
         }
 
-        .cta-form input:focus,
-        .cta-form select:focus {
-            border-color: var(--matrix-green);
-            box-shadow: var(--glow-soft);
-        }
-
-        .cta-form select {
-            flex: 1;
-            min-width: 200px;
-            cursor: pointer;
-        }
-
-        .cta-form button {
-            font-family: var(--font-mono);
-            padding: 0.9rem 2rem;
-            background: var(--gradient-matrix);
-            color: #000;
+        .stat-number-dash {
+            font-family: var(--font-display);
+            font-size: 1.6rem;
             font-weight: 700;
-            font-size: 0.9rem;
-            border: 1px solid var(--matrix-green);
-            border-radius: 8px;
-            cursor: pointer;
-            transition: all 0.3s;
-            white-space: nowrap;
+            color: var(--matrix-green);
         }
 
-        .cta-form button:hover {
-            transform: translateY(-2px);
-            box-shadow: var(--glow-strong);
-            background: var(--matrix-green);
+        .accounts-table-wrapper {
+            background: var(--bg-card);
+            border-radius: 20px;
+            border: 1px solid var(--border-color);
+            overflow-x: auto;
+            margin: 1.5rem 0;
         }
 
-        .cta-note {
+        .accounts-table {
+            width: 100%;
+            border-collapse: collapse;
             font-family: var(--font-mono);
             font-size: 0.75rem;
-            color: var(--text-muted);
+            min-width: 800px;
         }
 
-        /* ===== FOOTER ===== */
+        .accounts-table th {
+            text-align: left;
+            padding: 0.8rem;
+            background: rgba(0, 255, 65, 0.05);
+            border-bottom: 1px solid var(--border-color);
+            color: var(--matrix-green);
+        }
+
+        .accounts-table td {
+            padding: 0.8rem;
+            border-bottom: 1px solid rgba(0, 68, 17, 0.3);
+            color: var(--text-secondary);
+        }
+
+        .accounts-table tr:hover td {
+            background: var(--bg-card-hover);
+            color: var(--text-primary);
+        }
+
+        .badge-fund {
+            display: inline-block;
+            background: rgba(0, 255, 65, 0.15);
+            padding: 0.2rem 0.5rem;
+            border-radius: 30px;
+            font-size: 0.65rem;
+            border: 1px solid rgba(0, 255, 65, 0.3);
+            color: var(--matrix-green);
+        }
+
+        .positive-yield {
+            color: var(--matrix-green);
+            font-weight: 600;
+        }
+
+        .chart-row {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 1rem;
+            margin: 1.5rem 0;
+        }
+
+        .chart-box {
+            flex: 1;
+            min-width: 260px;
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: 20px;
+            padding: 1rem;
+        }
+
+        canvas {
+            max-height: 240px;
+            width: 100%;
+        }
+
+        .insight-note {
+            background: rgba(0, 255, 65, 0.03);
+            border-left: 3px solid var(--matrix-green);
+            padding: 1rem;
+            border-radius: 12px;
+            font-family: var(--font-mono);
+            font-size: 0.75rem;
+            margin-top: 1rem;
+        }
+
+        .cdi-counter {
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: #ffdf00;
+            text-shadow: 0 0 8px rgba(255, 223, 0, 0.5);
+            animation: pulse-gold 1.5s infinite;
+        }
+
+        @keyframes pulse-gold {
+            0% {
+                opacity: 0.9;
+            }
+
+            100% {
+                opacity: 1;
+                text-shadow: 0 0 15px #ffdf00;
+            }
+        }
+
+        .cta {
+            padding: 4rem 1rem;
+            text-align: center;
+            background: var(--bg-secondary);
+        }
+
+        .status-indicator {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.3rem 1rem;
+            background: var(--matrix-green-soft);
+            border-radius: 40px;
+            margin-bottom: 1.5rem;
+            font-size: 0.7rem;
+        }
+
+        .mvp-highlights {
+            display: grid;
+            gap: 0.8rem;
+            margin: 1.5rem 0;
+        }
+
+        .highlight-item {
+            padding: 0.8rem;
+            border: 1px solid rgba(0, 255, 150, .15);
+            background: rgba(0, 255, 150, .05);
+            border-radius: 12px;
+            font-size: 0.85rem;
+        }
+
+        .cta-actions {
+            margin-top: 1.5rem;
+        }
+
+        .cta-button {
+            display: inline-block;
+            padding: 0.8rem 1.8rem;
+            border-radius: 10px;
+            text-decoration: none;
+            font-weight: 600;
+            background: linear-gradient(135deg, #ff0000, #b00000);
+            color: #fff;
+            transition: 0.2s;
+            min-width: 180px;
+        }
+
+        .cta-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 0 20px rgba(218, 58, 58, 0.5);
+        }
+
         .footer {
             background: var(--bg-primary);
             border-top: 1px solid var(--border-color);
-            padding: 4rem 2rem 2rem;
+            padding: 2rem 1rem;
+            text-align: center;
         }
 
         .footer-grid {
             max-width: 1200px;
             margin: 0 auto;
             display: grid;
-            grid-template-columns: 2fr 1fr 1fr 1fr;
-            gap: 3rem;
-            margin-bottom: 3rem;
-        }
-
-        .footer-brand .logo-text {
-            font-family: var(--font-mono);
-            font-size: 1.5rem;
-            margin-bottom: 1rem;
-            display: block;
-            color: var(--matrix-green);
-        }
-
-        .footer-brand p {
-            color: var(--text-muted);
-            font-size: 0.9rem;
-            line-height: 1.7;
-            max-width: 300px;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 1.5rem;
         }
 
         .footer-col h4 {
             font-family: var(--font-mono);
-            font-size: 0.75rem;
-            font-weight: 700;
-            text-transform: uppercase;
-            letter-spacing: 0.15em;
+            font-size: 0.7rem;
             color: var(--matrix-green);
-            margin-bottom: 1.25rem;
+            margin-bottom: 0.8rem;
         }
 
         .footer-col ul {
             list-style: none;
         }
 
-        .footer-col ul li {
-            margin-bottom: 0.75rem;
-        }
-
         .footer-col ul li a {
             color: var(--text-secondary);
             text-decoration: none;
-            font-family: var(--font-mono);
-            font-size: 0.85rem;
-            transition: all 0.3s;
-        }
-
-        .footer-col ul li a:hover {
-            color: var(--matrix-green);
-            text-shadow: 0 0 8px var(--matrix-green-glow);
+            font-size: 0.75rem;
+            line-height: 2;
         }
 
         .footer-bottom {
-            max-width: 1200px;
-            margin: 0 auto;
-            padding-top: 2rem;
+            margin-top: 2rem;
+            padding-top: 1.5rem;
             border-top: 1px solid var(--border-color);
             display: flex;
             justify-content: space-between;
-            align-items: center;
             flex-wrap: wrap;
-            gap: 1rem;
-        }
-
-        .footer-bottom p {
-            font-family: var(--font-mono);
-            color: var(--text-muted);
-            font-size: 0.75rem;
-        }
-
-        .footer-socials {
-            display: flex;
-            gap: 1rem;
+            gap: 0.8rem;
+            font-size: 0.7rem;
         }
 
         .footer-socials a {
-            width: 36px;
-            height: 36px;
+            width: 32px;
+            height: 32px;
             background: var(--bg-card);
             border: 1px solid var(--border-color);
             border-radius: 8px;
-            display: flex;
+            display: inline-flex;
             align-items: center;
             justify-content: center;
             color: var(--text-muted);
             text-decoration: none;
-            font-family: var(--font-mono);
-            font-size: 0.9rem;
-            transition: all 0.3s;
+            margin: 0 0.2rem;
+            transition: 0.2s;
         }
 
         .footer-socials a:hover {
             border-color: var(--matrix-green);
             color: var(--matrix-green);
-            transform: translateY(-2px);
-            box-shadow: var(--glow-soft);
         }
 
-        /* ===== MATRIX PARTICLES ===== */
-        .particles {
-            position: absolute;
-            inset: 0;
-            overflow: hidden;
-            z-index: 0;
+        .fade-in {
+            opacity: 0;
+            transform: translateY(20px);
+            transition: all 0.6s ease;
         }
 
-        .particle {
-            position: absolute;
-            width: 2px;
-            height: 10px;
-            background: var(--matrix-green);
-            border-radius: 2px;
-            opacity: 0.6;
-            animation: matrixFall linear infinite;
-            box-shadow: 0 0 5px var(--matrix-green-glow);
+        .fade-in.visible {
+            opacity: 1;
+            transform: translateY(0);
         }
 
-        @keyframes matrixFall {
-            0% {
-                transform: translateY(-100px) scaleY(0.5);
-                opacity: 0;
-            }
-
-            10% {
-                opacity: 0.8;
-            }
-
-            90% {
-                opacity: 0.8;
-            }
-
-            100% {
-                transform: translateY(100vh) scaleY(1.5);
-                opacity: 0;
-            }
+        .restriction-banner {
+            background: linear-gradient(135deg, rgba(0, 68, 17, 0.3), rgba(0, 34, 8, 0.5));
+            border: 1px solid rgba(0, 255, 65, 0.3);
+            border-radius: 16px;
+            padding: 1.2rem;
+            margin: 1rem auto;
+            max-width: 800px;
+            text-align: center;
         }
 
-        /* ===== TERMINAL CURSOR EFFECT ===== */
+        .code-snippet {
+            font-family: var(--font-mono);
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: 10px;
+            padding: 0.8rem;
+            margin: 1rem 0 0;
+            font-size: 0.7rem;
+            text-align: left;
+            overflow-x: auto;
+        }
+
         .terminal-cursor {
             display: inline-block;
             width: 2px;
-            height: 1.2em;
+            height: 1em;
             background: var(--matrix-green);
             margin-left: 2px;
             animation: blink 1s step-end infinite;
-            vertical-align: text-bottom;
+            vertical-align: middle;
         }
 
         @keyframes blink {
@@ -1399,7 +841,17 @@
             }
         }
 
-        /* ===== RESPONSIVE ===== */
+        #matrix-canvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            opacity: 0.12;
+            pointer-events: none;
+        }
+
         @media (max-width: 768px) {
             .nav-links {
                 display: none;
@@ -1409,8 +861,8 @@
                 right: 0;
                 flex-direction: column;
                 background: rgba(0, 10, 0, 0.98);
-                padding: 2rem;
-                gap: 1.5rem;
+                padding: 1.2rem;
+                gap: 1rem;
                 border-bottom: 1px solid var(--border-color);
             }
 
@@ -1423,15 +875,20 @@
             }
 
             .hero-stats {
-                gap: 1rem;
+                gap: 0.8rem;
             }
 
             .stat-number {
-                font-size: 1.4rem;
+                font-size: 1rem;
             }
 
-            .features-grid {
-                grid-template-columns: 1fr;
+            .stat-label {
+                font-size: 0.5rem;
+            }
+
+            .layer-item {
+                flex-direction: column;
+                gap: 0.8rem;
             }
 
             .layers-timeline::before {
@@ -1439,195 +896,77 @@
             }
 
             .layer-number {
-                width: 48px;
-                height: 48px;
-                min-width: 48px;
-                font-size: 0.9rem;
-            }
-
-            .layer-item {
-                gap: 1rem;
+                width: 44px;
+                height: 44px;
+                min-width: 44px;
             }
 
             .flow-steps {
                 grid-template-columns: repeat(2, 1fr);
             }
 
-            .cta-form {
-                flex-direction: column;
-            }
-
-            .footer-grid {
+            .stats-grid-dash {
                 grid-template-columns: 1fr;
-                gap: 2rem;
             }
 
-            .footer-bottom {
-                flex-direction: column;
-                text-align: center;
+            .fund-section-title {
+                font-size: 1.4rem;
             }
         }
 
         @media (max-width: 480px) {
+            .hero-actions {
+                flex-direction: column;
+                align-items: center;
+            }
+
+            .btn-primary,
+            .btn-secondary {
+                width: 100%;
+                max-width: 240px;
+            }
+
             .flow-steps {
                 grid-template-columns: 1fr;
             }
 
-            .diff-grid {
-                grid-template-columns: 1fr;
+            .chart-box {
+                min-width: 100%;
             }
-
-            .compliance-badges {
-                flex-direction: column;
-                align-items: center;
-            }
-        }
-
-        /* ===== ANIMATIONS ===== */
-        .fade-in {
-            opacity: 0;
-            transform: translateY(30px);
-            transition: all 0.8s ease;
-        }
-
-        .fade-in.visible {
-            opacity: 1;
-            transform: translateY(0);
-        }
-
-        /* ===== STATUS INDICATOR ===== */
-        .status-indicator {
-            display: inline-flex;
-            align-items: center;
-            gap: 0.5rem;
-            padding: 0.4rem 1rem;
-            background: var(--matrix-green-soft);
-            border: 1px solid rgba(0, 255, 65, 0.3);
-            border-radius: 50px;
-            font-family: var(--font-mono);
-            font-size: 0.75rem;
-            font-weight: 600;
-            color: var(--matrix-green);
-            box-shadow: var(--glow-soft);
-        }
-
-        .status-indicator .dot {
-            width: 8px;
-            height: 8px;
-            background: var(--matrix-green);
-            border-radius: 50%;
-            animation: pulse 2s infinite;
-            box-shadow: 0 0 10px var(--matrix-green);
-        }
-
-        /* ===== CODE BLOCK STYLE ===== */
-        .code-snippet {
-            font-family: var(--font-mono);
-            background: var(--bg-card);
-            border: 1px solid var(--border-color);
-            border-radius: 8px;
-            padding: 1rem;
-            margin: 1rem 0;
-            font-size: 0.85rem;
-            color: var(--matrix-green-dim);
-            overflow-x: auto;
-        }
-
-        .mvp-highlights {
-            display: grid;
-            gap: 12px;
-            margin: 30px 0;
-        }
-
-        .highlight-item {
-            padding: 15px;
-            border: 1px solid rgba(0, 255, 150, .15);
-            background: rgba(0, 255, 150, .05);
-            border-radius: 8px;
-            backdrop-filter: blur(10px);
-        }
-
-        .cta-actions {
-            margin-top: 30px;
-        }
-
-        .cta-button {
-            display: inline-block;
-            padding: 16px 32px;
-            border-radius: 8px;
-            text-decoration: none;
-            font-weight: 600;
-            background: linear-gradient(135deg,
-                    #ff0000,
-                    #ff0000);
-            color: #050816;
-            transition: .3s;
-        }
-
-        .cta-button:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 0 30px rgba(218, 58, 58, 0.4);
         }
     </style>
 </head>
 
 <body>
-
     <canvas id="matrix-canvas"></canvas>
-
-    <!-- NAVBAR -->
     <nav class="navbar" id="navbar">
         <div class="nav-container">
-            <a href="#" class="nav-logo">
-                <!-- <img src="lowdata.jpg" alt="LOWDATAESC" class="logo-img" onerror="this.style.display='none'"> -->
-                <span class="logo-text">LOWDATAESC<span class="logo-badge">🇧🇷</span></span>
-            </a>
+            <a href="#" class="nav-logo"><span class="logo-text">LOWDATAESC<span class="logo-badge">BR</span></span></a>
             <ul class="nav-links" id="navLinks">
                 <li><a href="#features">Recursos</a></li>
                 <li><a href="#security">Segurança</a></li>
                 <li><a href="#flow">Operação</a></li>
                 <li><a href="#architecture">Infraestrutura</a></li>
-                <li><a href="#compliance">Compliance</a></li>
-                <li><a href="#contact" class="nav-cta">[ACESSO]</a></li>
+                <li><a href="#fund-accounts">Fundo CDI</a></li>
+                <li><a href="#contact" class="nav-cta">ACESSO</a></li>
             </ul>
-            <button class="mobile-toggle" id="mobileToggle" aria-label="Menu">
-                <span></span><span></span><span></span>
-            </button>
+            <button class="mobile-toggle" id="mobileToggle"
+                aria-label="Menu"><span></span><span></span><span></span></button>
         </div>
     </nav>
 
-    <!-- HERO -->
     <section class="hero" id="hero">
-        <div class="hero-bg">
-            <div class="grid-overlay"></div>
-            <div class="particles" id="particles"></div>
-        </div>
         <div class="hero-content">
-            <div class="hero-badge">
-                <span class="pulse"></span>
-                > SYSTEM_SECURE • ZERO_TRUST • BR
-            </div>
-            <h1 class="hero-title">
-                <span class="text-glow-strong">./dados_protegidos</span><br>
-                <span class="gradient-text">./valor_escalonado</span><br>
-                ./confiança_institucional<span class="br-flag">🇧🇷</span><span class="terminal-cursor"></span>
-            </h1>
-            <p class="hero-subtitle">
-                Plataforma de armazenamento e monetização de dados estruturados com custódia inteligente em escrow,
-                segurança Zero Trust e rendimentos diários para instituições financeiras brasileiras.
-                <br><br>
-                <span style="font-family: var(--font-mono); color: var(--matrix-green-dim);">
-                    > initialize_protocol --secure --matrix-mode
-                </span>
-            </p>
-            <div class="hero-actions">
-                <a href="#contact" class="btn-primary">
-                    [SOLICITAR_DEMO]
-                </a>
-                <a href="#security" class="btn-secondary">
-                    [VER_SEGURANÇA]
-                </a>
-            </div>
+            <div class="hero-badge"><span class="pulse"></span> SYSTEM_SECURE • ZERO_TRUST • BR</div>
+            <h1 class="hero-title"><span class="text-glow-strong">./dados_protegidos</span><br><span
+                    class="gradient-text">./valor_escalonado</span><br>./confianca_institucional<span
+                    class="br-flag">BR</span><span class="terminal-cursor"></span></h1>
+            <p class="hero-subtitle">Plataforma de armazenamento e monetização de dados estruturados com custódia
+                inteligente em escrow, segurança Zero Trust e rendimentos diários para instituições financeiras
+                brasileiras.<br><span style="font-family:var(--font-mono);color:var(--matrix-green-dim);">
+                    initialize_protocol --secure --matrix-mode</span></p>
+            <div class="hero-actions"><a href="#contact" class="btn-primary">SOLICITAR DEMO</a><a href="#security"
+                    class="btn-secondary">VER SEGURANÇA</a></div>
             <div class="hero-stats">
                 <div class="stat-item">
                     <div class="stat-number">99.99%</div>
@@ -1657,32 +996,23 @@
         </div>
     </section>
 
-    <!-- RESTRICTION NOTICE -->
     <div class="container">
         <div class="restriction-banner fade-in">
-            <div class="icon"></div>
-            <h4>> ACCESS_RESTRICTED</h4>
+            <h4> ACCESS_RESTRICTED</h4>
             <p>LOWDATAESC opera exclusivamente com transações homologadas entre sócios ou contas agregadas no terminal.
                 Conformidade regulatória brasileira garantida.</p>
-            <div class="code-snippet">
-                if (user.isHomologated && transaction.isVerified) {<br>
-                &nbsp;&nbsp;executeSecureTransfer();<br>
-                } else {<br>
-                &nbsp;&nbsp;blockAndAlert();<br>
-                }
-            </div>
+            <div class="code-snippet">if (user.isHomologated &amp;&amp; transaction.isVerified)
+                {<br>&nbsp;&nbsp;executeSecureTransfer();<br>} else {<br>&nbsp;&nbsp;blockAndAlert();<br>}</div>
         </div>
     </div>
 
-    <!-- FEATURES -->
     <section class="features" id="features">
         <div class="container">
             <div class="features-header fade-in">
-                <div class="section-label">> FEATURES</div>
+                <div class="section-label"> FEATURES</div>
                 <h2 class="section-title">Por que <span class="gradient-text">LOWDATAESC</span>?</h2>
-                <p class="section-subtitle">
-                    Plataforma construída para demandas do mercado financeiro brasileiro com segurança de nível militar.
-                </p>
+                <p class="section-subtitle">Plataforma construída para demandas do mercado financeiro brasileiro com
+                    segurança de nível militar.</p>
             </div>
             <div class="features-grid">
                 <div class="feature-card fade-in">
@@ -1691,10 +1021,8 @@
                         autorização.</p>
                 </div>
                 <div class="feature-card fade-in">
-                    <div class="feature-icon cyan">🏦</div>
                     <h3>Escrow Segregado</h3>
-                    <p>Ativos protegidos com separação patrimonial, proteção jurídica e auditoria contínua para
-                        governança.</p>
+                    <p>Ativos protegidos com separação patrimonial, proteção jurídica e auditoria contínua.</p>
                 </div>
                 <div class="feature-card fade-in">
                     <h3>Rendimentos Diários</h3>
@@ -1702,8 +1030,8 @@
                 </div>
                 <div class="feature-card fade-in">
                     <h3>Biometria Facial</h3>
-                    <p>Reconhecimento facial em tempo real com liveness detection integrado a Serasa e Anatel.</p>
-                    <span class="partner-badge">🔗 SERASA + ANATEL</span>
+                    <p>Reconhecimento facial em tempo real com liveness detection integrado a Serasa e Anatel.</p><span
+                        class="partner-badge"> SERASA + ANATEL</span>
                 </div>
                 <div class="feature-card fade-in">
                     <h3>Behavioral AI</h3>
@@ -1717,599 +1045,461 @@
         </div>
     </section>
 
-    <!-- SECURITY -->
+    <section class="fund-dashboard" id="fund-accounts">
+        <div class="dashboard-container">
+            <div class="section-label"> FUNDO_ESCROW • CDI_100%</div>
+            <h2 class="fund-section-title">Contas conjuntas Escrow<br><span class="gradient-text">Patrimônio total: R$
+                    94,7 Bilhões</span></h2>
+            <p style="color: var(--text-secondary); margin-bottom: 1rem;">Empresas fictícias de grande porte —
+                rendimentos diários atrelados ao CDI (100% do CDI) com atualização em tempo real.</p>
+            <div class="stats-grid-dash" id="summaryCards"></div>
+            <div class="stat-card-dash" style="text-align:center; margin-bottom:1.5rem;">
+                <div class="stat-label-dash">RENDIMENTO TOTAL ACUMULADO (CDI)</div>
+                <div class="cdi-counter" id="totalYieldCounter">R$ 0,00</div>
+                <div style="font-size:0.7rem;">atualizando a cada segundo • 100% do CDI (13,65% a.a.)</div>
+            </div>
+            <div class="accounts-table-wrapper">
+                <table class="accounts-table" id="fundAccountsTable">
+                    <thead>
+                        <tr>
+                            <th>Empresa / Consórcio</th>
+                            <th>Tipo de Conta</th>
+                            <th>Patrimônio Aplicado (R$)</th>
+                            <th>Rendimento Acumulado (R$)</th>
+                            <th>Rendimento Diário (R$)</th>
+                            <th>Yield CDI %</th>
+                            <th>Participação %</th>
+                            <th>Status</th>
+                        </tr>
+                    </thead>
+                    <tbody id="accountsTableBody"></tbody>
+                </table>
+            </div>
+            <div class="chart-row">
+                <div class="chart-box">
+                    <h4 style="color:var(--matrix-green);">Rendimento Acumulado por Empresa</h4><canvas
+                        id="yieldBarChart"></canvas>
+                </div>
+                <div class="chart-box">
+                    <h4 style="color:var(--matrix-green);">Participação no Fundo</h4><canvas
+                        id="depositPieChart"></canvas>
+                </div>
+            </div>
+            <div class="insight-note"><span style="color:var(--matrix-green);">CDI:</span> Rendimentos calculados com
+                base na taxa CDI (13,65% a.a.). O contador simula acréscimo contínuo a cada segundo, demonstrando
+                evolução em tempo real. Cada conta possui segregação total e rastreabilidade auditável.</div>
+        </div>
+    </section>
+
     <section class="security" id="security">
         <div class="container">
             <div class="security-header fade-in">
-                <div class="section-label">> SECURITY_LAYERS</div>
+                <div class="section-label"> SECURITY_LAYERS</div>
                 <h2 class="section-title">6 Camadas de <span class="gradient-text">Proteção</span></h2>
-                <p class="section-subtitle">
-                    Arquitetura multicamada garantindo proteção absoluta em cada etapa do processo.
-                </p>
+                <p class="section-subtitle">Arquitetura multicamada garantindo proteção absoluta em cada etapa.</p>
             </div>
             <div class="layers-timeline">
                 <div class="layer-item">
                     <div class="layer-number">01</div>
                     <div class="layer-content">
                         <h3>Validação de Identidade</h3>
-                        <p>KYC corporativo com validação documental, representantes legais, antifraude e biometria
-                            facial com prova de vida via Serasa/Anatel.</p>
-                        <div class="layer-tags">
-                            <span class="layer-tag">KYC_CORP</span>
-                            <span class="layer-tag">BIOMETRIA</span>
-                            <span class="layer-tag">LIVENESS</span>
-                            <span class="layer-tag partner">SERASA</span>
-                            <span class="layer-tag partner">ANATEL</span>
-                        </div>
+                        <p>KYC + biometria facial com Serasa/Anatel.</p>
+                        <div class="layer-tags"><span class="layer-tag">KYC_CORP</span><span
+                                class="layer-tag">BIOMETRIA</span><span class="layer-tag partner">SERASA</span></div>
                     </div>
                 </div>
                 <div class="layer-item">
                     <div class="layer-number">02</div>
                     <div class="layer-content">
                         <h3>Registro de Dispositivo</h3>
-                        <p>Identificador criptográfico único com hardware ID, fingerprint, geolocalização e histórico
-                            validado pela Anatel.</p>
-                        <div class="layer-tags">
-                            <span class="layer-tag">HARDWARE_ID</span>
-                            <span class="layer-tag">FINGERPRINT</span>
-                            <span class="layer-tag">GEO_LOCK</span>
-                            <span class="layer-tag partner">ANATEL</span>
-                        </div>
+                        <p>Hardware ID + fingerprint validado pela Anatel.</p>
+                        <div class="layer-tags"><span class="layer-tag">HARDWARE_ID</span><span
+                                class="layer-tag partner">ANATEL</span></div>
                     </div>
                 </div>
                 <div class="layer-item">
                     <div class="layer-number">03</div>
                     <div class="layer-content">
                         <h3>Inteligência Comportamental</h3>
-                        <p>Perfil contínuo baseado em keystroke dynamics, touch pattern, horários, localizações e
-                            sequências de navegação.</p>
-                        <div class="layer-tags">
-                            <span class="layer-tag">KEYSTROKE_AI</span>
-                            <span class="layer-tag">TOUCH_PATTERN</span>
-                            <span class="layer-tag">BEHAVIORAL_ML</span>
-                        </div>
+                        <p>Keystroke dynamics, touch pattern, localização.</p>
+                        <div class="layer-tags"><span class="layer-tag">BEHAVIORAL_AI</span></div>
                     </div>
                 </div>
                 <div class="layer-item">
                     <div class="layer-number">04</div>
                     <div class="layer-content">
                         <h3>Proteção Anti-Roubo</h3>
-                        <p>Dispositivo perdido: permissões suspensas, tokens revogados, sessões encerradas e operações
-                            bloqueadas instantaneamente.</p>
-                        <div class="layer-tags">
-                            <span class="layer-tag">AUTO_BLOCK</span>
-                            <span class="layer-tag">TOKEN_REVOKE</span>
-                            <span class="layer-tag">SESSION_KILL</span>
-                        </div>
+                        <p>Bloqueio automático e revogação de tokens.</p>
                     </div>
                 </div>
                 <div class="layer-item">
                     <div class="layer-number">05</div>
                     <div class="layer-content">
                         <h3>Motor Antifraude</h3>
-                        <p>Centenas de verificações em tempo real: risk scoring, correlação de identidade, VPN
-                            detection, emuladores e anomalias.</p>
-                        <div class="layer-tags">
-                            <span class="layer-tag">RISK_ENGINE</span>
-                            <span class="layer-tag">VPN_DETECT</span>
-                            <span class="layer-tag">ANOMALY_AI</span>
-                        </div>
+                        <p>Risk scoring, VPN detection, anomalias.</p>
                     </div>
                 </div>
                 <div class="layer-item">
                     <div class="layer-number">06</div>
                     <div class="layer-content">
                         <h3>Contas Escrow</h3>
-                        <p>Ativos segregados com separação patrimonial, proteção jurídica, auditoria contínua e
-                            governança institucional.</p>
-                        <div class="layer-tags">
-                            <span class="layer-tag">ASSET_SEPARATION</span>
-                            <span class="layer-tag">LEGAL_PROTECTION</span>
-                            <span class="layer-tag">AUDIT_TRAIL</span>
-                        </div>
+                        <p>Separação patrimonial e auditoria contínua.</p>
                     </div>
                 </div>
             </div>
         </div>
     </section>
 
-    <!-- FLOW -->
     <section class="flow" id="flow">
         <div class="container">
             <div class="flow-header fade-in">
-                <div class="section-label">> OPERATIONAL_FLOW</div>
+                <div class="section-label"> OPERATIONAL_FLOW</div>
                 <h2 class="section-title">Fluxo <span class="gradient-text">Operacional</span></h2>
-                <p class="section-subtitle">
-                    Cada operação passa por validação rigorosa em 10 etapas sequenciais.
-                </p>
+                <p class="section-subtitle">Cada operação passa por validação rigorosa em 10 etapas sequenciais.</p>
             </div>
             <div class="flow-steps">
                 <div class="flow-step fade-in">
                     <div class="step-number">01</div>
                     <h4>REQUEST_INIT</h4>
-                    <p>Usuário solicita operação</p>
                 </div>
                 <div class="flow-step fade-in">
                     <div class="step-number">02</div>
                     <h4>FACE_VERIFY</h4>
-                    <p>Biometria facial em tempo real</p>
                 </div>
                 <div class="flow-step fade-in">
                     <div class="step-number">03</div>
                     <h4>DEVICE_CHECK</h4>
-                    <p>Validação do equipamento</p>
                 </div>
                 <div class="flow-step fade-in">
                     <div class="step-number">04</div>
                     <h4>BEHAVIOR_MATCH</h4>
-                    <p>Comparação com perfil histórico</p>
                 </div>
                 <div class="flow-step fade-in">
                     <div class="step-number">05</div>
                     <h4>RISK_CALC</h4>
-                    <p>Cálculo de risco em tempo real</p>
                 </div>
                 <div class="flow-step fade-in">
                     <div class="step-number">06</div>
                     <h4>COMPLIANCE_OK</h4>
-                    <p>Verificação de regras corporativas</p>
                 </div>
                 <div class="flow-step fade-in">
                     <div class="step-number">07</div>
                     <h4>DIGITAL_SIGN</h4>
-                    <p>Operação assinada criptograficamente</p>
                 </div>
                 <div class="flow-step fade-in">
                     <div class="step-number">08</div>
                     <h4>IMMUTABLE_LOG</h4>
-                    <p>Registro em ledger seguro</p>
                 </div>
                 <div class="flow-step fade-in">
                     <div class="step-number">09</div>
                     <h4>EXECUTE_TX</h4>
-                    <p>Transação processada</p>
                 </div>
                 <div class="flow-step fade-in">
                     <div class="step-number">10</div>
                     <h4>AUDIT_COMPLETE</h4>
-                    <p>Evento registrado e auditado</p>
                 </div>
             </div>
         </div>
     </section>
 
-    <!-- ARCHITECTURE -->
     <section class="architecture" id="architecture">
         <div class="container">
             <div class="arch-header fade-in">
-                <div class="section-label">> TECH_STACK</div>
+                <div class="section-label"> TECH_STACK</div>
                 <h2 class="section-title">Infraestrutura <span class="gradient-text">Tecnológica</span></h2>
-                <p class="section-subtitle">
-                    Stack moderna e robusta construída com as melhores tecnologias do mercado.
-                </p>
+                <p class="section-subtitle">Stack moderna e robusta construída com as melhores tecnologias.</p>
             </div>
             <div class="arch-grid">
                 <div class="arch-card fade-in">
-                    <div class="arch-card-label"><span class="dot"></span> FRONTEND</div>
-                    <div class="tech-list">
-                        <span class="tech-tag">HTML5</span>
-                        <span class="tech-tag">CSS3</span>
-                        <span class="tech-tag">JavaScript</span>
+                    <div class="arch-card-label">FRONTEND</div>
+                    <div class="tech-list"><span class="tech-tag">HTML5</span><span class="tech-tag">CSS3</span><span
+                            class="tech-tag">JavaScript</span></div>
+                </div>
+                <div class="arch-card fade-in">
+                    <div class="arch-card-label">BACKEND</div>
+                    <div class="tech-list"><span class="tech-tag">Node.js</span><span class="tech-tag">Python_IA</span>
                     </div>
                 </div>
                 <div class="arch-card fade-in">
-                    <div class="arch-card-label"><span class="dot"></span> BACKEND</div>
-                    <div class="tech-list">
-                        <span class="tech-tag">Node.js</span>
-                        <span class="tech-tag">NestJS</span>
-                        <span class="tech-tag">Python_IA</span>
-                    </div>
+                    <div class="arch-card-label">SECURITY</div>
+                    <div class="tech-list"><span class="tech-tag">AES-256</span><span
+                            class="tech-tag">TLS_1.3</span><span class="tech-tag">HSM</span></div>
                 </div>
                 <div class="arch-card fade-in">
-                    <div class="arch-card-label"><span class="dot"></span> DATABASE</div>
-                    <div class="tech-list">
-                        <span class="tech-tag">PostgreSQL</span>
-                        <span class="tech-tag">Redis</span>
-                        <span class="tech-tag">DataLake</span>
-                    </div>
-                </div>
-                <div class="arch-card fade-in">
-                    <div class="arch-card-label"><span class="dot"></span> SECURITY</div>
-                    <div class="tech-list">
-                        <span class="tech-tag">AES-256</span>
-                        <span class="tech-tag">TLS_1.3</span>
-                        <span class="tech-tag">HSM</span>
-                        <span class="tech-tag">MFA</span>
-                    </div>
-                </div>
-                <div class="arch-card fade-in">
-                    <div class="arch-card-label"><span class="dot"></span> OBSERVABILITY</div>
-                    <div class="tech-list">
-                        <span class="tech-tag">Prometheus</span>
-                        <span class="tech-tag">Grafana</span>
-                        <span class="tech-tag">ELK_Stack</span>
-                    </div>
-                </div>
-                <div class="arch-card fade-in">
-                    <div class="arch-card-label"><span class="dot"></span> BRAZIL_INTEGRATIONS</div>
-                    <div class="tech-list">
-                        <span class="tech-tag">Serasa_API</span>
-                        <span class="tech-tag">Anatel_SDK</span>
-                        <span class="tech-tag">LGPD_Compliant</span>
-                    </div>
+                    <div class="arch-card-label">BRAZIL</div>
+                    <div class="tech-list"><span class="tech-tag">Serasa_API</span><span
+                            class="tech-tag">Anatel_SDK</span><span class="tech-tag">LGPD</span></div>
                 </div>
             </div>
         </div>
     </section>
 
-    <!-- COMPLIANCE -->
     <section class="compliance" id="compliance">
         <div class="container">
             <div class="compliance-header fade-in">
-                <div class="section-label">> COMPLIANCE</div>
+                <div class="section-label"> COMPLIANCE</div>
                 <h2 class="section-title">Conformidade <span class="gradient-text">Regulatória</span></h2>
-                <p class="section-subtitle">
-                    Projetada para atender os mais rigorosos padrões regulatórios do mercado brasileiro.
-                </p>
+                <p class="section-subtitle">Projetada para atender os mais rigorosos padrões regulatórios do mercado
+                    brasileiro.</p>
             </div>
             <div class="compliance-badges fade-in">
-                <div class="compliance-badge">
-                    <div class="badge-icon">📋</div>
-                    <div>
-                        <div class="badge-text">LGPD</div>
-                        <div class="badge-sub">Lei Geral de Proteção de Dados</div>
-                    </div>
-                </div>
-                <div class="compliance-badge">
-                    <div class="badge-icon">🔒</div>
-                    <div>
-                        <div class="badge-text">ISO 27001</div>
-                        <div class="badge-sub">Segurança da Informação</div>
-                    </div>
-                </div>
-                <div class="compliance-badge">
-                    <div class="badge-icon">🛡️</div>
-                    <div>
-                        <div class="badge-text">ISO 27701</div>
-                        <div class="badge-sub">Gestão de Privacidade</div>
-                    </div>
-                </div>
-                <div class="compliance-badge">
-                    <div class="badge-icon">📊</div>
-                    <div>
-                        <div class="badge-text">SOC 2</div>
-                        <div class="badge-sub">Controles de Segurança</div>
-                    </div>
-                </div>
-                <div class="compliance-badge">
-                    <div class="badge-icon">🏛️</div>
-                    <div>
-                        <div class="badge-text">Open Finance BR</div>
-                        <div class="badge-sub">Boas Práticas BCB</div>
-                    </div>
-                </div>
+                <div class="compliance-badge">LGPD</div>
+                <div class="compliance-badge">ISO 27001</div>
+                <div class="compliance-badge">ISO 27701</div>
+                <div class="compliance-badge">SOC 2</div>
+                <div class="compliance-badge">Open Finance BR</div>
             </div>
         </div>
     </section>
 
-    <!-- DIFFERENTIALS -->
     <section class="differentials" id="differentials">
         <div class="container">
             <div class="diff-header fade-in">
-                <div class="section-label">> DIFFERENTIALS</div>
+                <div class="section-label"> DIFFERENTIALS</div>
                 <h2 class="section-title">O que nos torna <span class="gradient-text">únicos</span></h2>
-                <p class="section-subtitle">
-                    Recursos exclusivos que posicionam a LOWDATAESC como líder em segurança no Brasil.
-                </p>
+                <p class="section-subtitle">Recursos exclusivos que posicionam a LOWDATAESC como líder em segurança no
+                    Brasil.</p>
             </div>
             <div class="diff-grid">
                 <div class="diff-item fade-in">
                     <div class="diff-check">✓</div>
                     <div>
                         <h4>Dados Escalonados <span class="diff-partner">Serasa</span></h4>
-                        <p>Alta disponibilidade com escalabilidade horizontal e validação via Serasa</p>
+                        <p>Escalabilidade horizontal com validação via Serasa</p>
                     </div>
                 </div>
                 <div class="diff-item fade-in">
                     <div class="diff-check">✓</div>
                     <div>
                         <h4>Contas Escrow Segregadas</h4>
-                        <p>Proteção patrimonial e jurídica dos ativos digitais</p>
+                        <p>Proteção patrimonial e jurídica</p>
                     </div>
                 </div>
                 <div class="diff-item fade-in">
                     <div class="diff-check">✓</div>
                     <div>
-                        <h4>Rendimentos Diários</h4>
-                        <p>Monetização contínua dos dados com retorno garantido</p>
+                        <h4>Rendimentos Diários atrelados ao CDI</h4>
+                        <p>Rentabilidade contínua 100% CDI</p>
                     </div>
                 </div>
                 <div class="diff-item fade-in">
                     <div class="diff-check">✓</div>
                     <div>
                         <h4>Biometria Facial Contínua</h4>
-                        <p>Autenticação biométrica em tempo real com prova de vida</p>
+                        <p>Autenticação biométrica em tempo real</p>
                     </div>
                 </div>
                 <div class="diff-item fade-in">
                     <div class="diff-check">✓</div>
                     <div>
                         <h4>Inteligência Comportamental</h4>
-                        <p>IA que aprende e valida padrões únicos de cada usuário</p>
+                        <p>IA que aprende padrões únicos</p>
                     </div>
                 </div>
                 <div class="diff-item fade-in">
                     <div class="diff-check">✓</div>
                     <div>
                         <h4>Bloqueio Automático <span class="diff-partner">Anatel</span></h4>
-                        <p>Dispositivos comprometidos invalidados instantaneamente via Anatel</p>
-                    </div>
-                </div>
-                <div class="diff-item fade-in">
-                    <div class="diff-check">✓</div>
-                    <div>
-                        <h4>Auditoria Completa</h4>
-                        <p>Trilha imutável com registro criptográfico de cada evento</p>
-                    </div>
-                </div>
-                <div class="diff-item fade-in">
-                    <div class="diff-check">✓</div>
-                    <div>
-                        <h4>Segurança Institucional</h4>
-                        <p>Nível de segurança para grandes instituições financeiras brasileiras</p>
+                        <p>Dispositivos comprometidos invalidados</p>
                     </div>
                 </div>
             </div>
         </div>
     </section>
 
-    <!-- CTA -->
     <section class="cta" id="contact">
-        <div class="cta-bg"></div>
-        <div class="cta-content fade-in">
-            <div class="status-indicator">
-                <span class="dot"></span>
-                > SYSTEM_STATUS: OPERATIONAL • HOMOLOGATED_BR
-            </div>
-            <h2 class="cta-title" style="margin-top:1.5rem">
-                Pronto para elevar a <span class="gradient-text">segurança dos seus dados</span>?
-            </h2>
-
-            <p class="cta-subtitle">
-                Descubra por que a LOWDATAESC representa uma nova geração de custódia e validação de ativos digitais.
-
-                <br><br>
-
-                <span style="font-family: var(--font-mono); color: var(--matrix-green-dim);">
-                    > STATUS: MVP_OPERACIONAL
-                </span>
-            </p>
-
+        <div class="cta-content">
+            <div class="status-indicator"><span class="dot"
+                    style="width:8px;height:8px;background:var(--matrix-green);border-radius:50%;display:inline-block;"></span>
+                SYSTEM_STATUS: OPERATIONAL • HOMOLOGATED_BR</div>
+            <h2 class="cta-title" style="margin-top:1.5rem">Pronto para elevar a <span class="gradient-text">segurança
+                    dos seus dados</span>?</h2>
+            <p class="cta-subtitle">Descubra por que a LOWDATAESC representa uma nova geração de custódia e validação de
+                ativos digitais.<br><br><span style="font-family:var(--font-mono);color:var(--matrix-green-dim);">
+                    STATUS: MVP_OPERACIONAL</span></p>
             <div class="mvp-highlights">
-                <div class="highlight-item">
-                    ✓ Validação de identidade com biometria facial
-                </div>
-
-                <div class="highlight-item">
-                    ✓ Vinculação segura ao dispositivo homologado
-                </div>
-
-                <div class="highlight-item">
-                    ✓ Registro imutável de operações
-                </div>
-
-                <div class="highlight-item">
-                    ✓ Camada de conformidade LGPD
-                </div>
-
-                <div class="highlight-item">
-                    ✓ Sistema de prevenção contra uso indevido de dispositivos
-                </div>
-
-                <div class="highlight-item">
-                    ✓ Arquitetura Escrow para proteção de ativos digitais
-                </div>
+                <div class="highlight-item">Validação de identidade com biometria facial</div>
+                <div class="highlight-item">Vinculação segura ao dispositivo homologado</div>
+                <div class="highlight-item">Registro imutável de operações</div>
+                <div class="highlight-item">Camada de conformidade LGPD</div>
+                <div class="highlight-item">Sistema de prevenção contra uso indevido de dispositivos</div>
+                <div class="highlight-item">Arquitetura Escrow para proteção de ativos digitais</div>
             </div>
-
-            <div class="cta-actions">
-                <a href="https://pt.scribd.com/document/1044787509/PITCHDECK-LOWDATAESC?secret_password=nk4qqiKvso97ovg2Zsxq&_gl=1*x2uzv0*_up*MQ..*_ga*ODM5ODAzMzAxLjE3ODAxMTQyMzU.*_ga_Z4ZC50DED6*czE3ODAxMTQyMzMkbzEkZzEkdDE3ODAxMTQyNTMkajQwJGwwJGgw*_ga_8KZ8BV0P5W*czE3ODAxMTQyMzMkbzEkZzEkdDE3ODAxMTQyNTMkajQwJGwwJGgw" target="_blank" class="cta-button">
-                    [ACESSAR_PESQUISA_MVP]
-                </a>
-            </div>
-
-            <div class="cta-actions">
-                <a href="demo.html" target="_blank" class="cta-button">
-                    [ACESSAR_DEMO]
-                </a>
-            </div>
-
-            <p class="cta-note">
-                🔒 Ambiente de demonstração • MVP em evolução contínua • Feedback em tempo real é utilizado para
-                aprimoramento da plataforma
-            </p>
+            <div class="cta-actions"><a href="#" target="_blank" class="cta-button">ACESSAR PESQUISA MVP</a></div>
+            <div class="cta-actions"><a href="#" class="cta-button">ACESSAR DEMO</a></div>
+            <p class="cta-note">Ambiente de demonstração • MVP em evolução contínua</p>
+        </div>
     </section>
 
-    <!-- FOOTER -->
     <footer class="footer">
         <div class="footer-grid">
-            <div class="footer-brand">
-                <span class="logo-text">LOWDATAESC<span class="logo-badge">🇧🇷</span></span>
-                <p>Dados protegidos. Valor escalonado. Confiança institucional. Plataforma definitiva para custódia e
-                    monetização de dados no Brasil.</p>
+            <div class="footer-brand"><span class="logo-text">LOWDATAESC BR</span>
+                <p>Dados protegidos. Valor escalonado. Confiança institucional.</p>
             </div>
             <div class="footer-col">
-                <h4>> PLATFORM</h4>
+                <h4>PLATFORM</h4>
                 <ul>
                     <li><a href="#features">Recursos</a></li>
                     <li><a href="#security">Segurança</a></li>
-                    <li><a href="#flow">Operação</a></li>
-                    <li><a href="#architecture">Infraestrutura</a></li>
+                    <li><a href="#fund-accounts">Fundo CDI</a></li>
                 </ul>
             </div>
             <div class="footer-col">
-                <h4>> COMPANY</h4>
+                <h4>LEGAL</h4>
                 <ul>
-                    <li><a href="#">Sobre Nós</a></li>
-                    <li><a href="#">Carreiras</a></li>
-                    <li><a href="#">Blog</a></li>
-                    <li><a href="#">Imprensa</a></li>
-                </ul>
-            </div>
-            <div class="footer-col">
-                <h4>> LEGAL</h4>
-                <ul>
-                    <li><a href="#">Termos de Uso</a></li>
-                    <li><a href="#">Política de Privacidade</a></li>
                     <li><a href="#">LGPD</a></li>
-                    <li><a href="#">Compliance</a></li>
+                    <li><a href="#">Termos</a></li>
                 </ul>
             </div>
         </div>
         <div class="footer-bottom">
-            <p>© 2025 LOWDATAESC Brasil • Todos os direitos reservados • Integrado com Serasa e Anatel</p>
-            <div class="footer-socials">
-                <a href="#" title="LinkedIn">in</a>
-                <a href="#" title="Twitter">𝕏</a>
-                <a href="#" title="GitHub">⌨</a>
-            </div>
+            <p>2025 LOWDATAESC Brasil • Todos os direitos reservados • Integrado com Serasa e Anatel</p>
+            <div class="footer-socials"><a href="#">in</a><a href="#">X</a><a href="#">GH</a></div>
         </div>
     </footer>
 
     <script>
-        // ===== MATRIX RAIN CANVAS =====
-        const canvas = document.getElementById('matrix-canvas');
-        const ctx = canvas.getContext('2d');
+        (function () {
+            const canvas = document.getElementById('matrix-canvas');
+            if (!canvas) return;
+            const ctx = canvas.getContext('2d');
+            function resize() { canvas.width = window.innerWidth; canvas.height = window.innerHeight; }
+            window.addEventListener('resize', resize); resize();
+            const chars = "01アイウエオカキクケコサシスセソタチツテト";
+            const fontSize = 14;
+            let cols = Math.floor(canvas.width / fontSize);
+            let drops = [];
+            function init() { cols = Math.floor(canvas.width / fontSize); drops = []; for (let i = 0; i < cols; i++) drops[i] = Math.random() * -100; }
+            init(); window.addEventListener('resize', init);
+            function draw() {
+                ctx.fillStyle = 'rgba(0,0,0,0.05)'; ctx.fillRect(0, 0, canvas.width, canvas.height);
+                ctx.fillStyle = '#00ff41'; ctx.font = fontSize + "px 'JetBrains Mono', monospace";
+                for (let i = 0; i < drops.length; i++) {
+                    let ch = chars[Math.floor(Math.random() * chars.length)];
+                    let x = i * fontSize, y = drops[i] * fontSize;
+                    ctx.globalAlpha = 0.2 + Math.random() * 0.5;
+                    ctx.fillText(ch, x, y);
+                    if (y > canvas.height && Math.random() > 0.975) drops[i] = 0;
+                    drops[i]++;
+                }
+                requestAnimationFrame(draw);
+            }
+            draw();
+        })();
 
-        function resizeCanvas() {
-            canvas.width = window.innerWidth;
-            canvas.height = window.innerHeight;
+        const fundAccounts = [
+            { name: "CONSÓRCIO NACIONAL DE ENERGIA", type: "Consórcio Energético", deposit: 18500000000, accumulatedYield: 0, apy: 13.65 },
+            { name: "FUNDO DE PENSÃO DOS CORREIOS (POSTALPREV)", type: "Fundação de Previdência", deposit: 14200000000, accumulatedYield: 0, apy: 13.65 },
+            { name: "BANCO REGIONAL SUL (BRS PAR)", type: "Instituição Financeira", deposit: 9800000000, accumulatedYield: 0, apy: 13.65 },
+            { name: "SEGUROS UNIDAS BRASIL", type: "Seguradora", deposit: 7600000000, accumulatedYield: 0, apy: 13.65 },
+            { name: "HOLDING AGRO BRASIL (HAB)", type: "Holding do Agronegócio", deposit: 11200000000, accumulatedYield: 0, apy: 13.65 },
+            { name: "FUNDO DE INVESTIMENTO ATLÂNTICO", type: "Fundo Multimercado", deposit: 6700000000, accumulatedYield: 0, apy: 13.65 },
+            { name: "SOCIEDADE DE CRÉDITO NORTE", type: "Financeira", deposit: 5400000000, accumulatedYield: 0, apy: 13.65 },
+            { name: "INFRAESTRUTURA BRASIL FUNDO", type: "FIP-IE", deposit: 8300000000, accumulatedYield: 0, apy: 13.65 },
+            { name: "SISTEMA COOPERATIVO SICOOB", type: "Cooperativa Central", deposit: 15100000000, accumulatedYield: 0, apy: 13.65 },
+            { name: "EMPRESA METROVIÁRIA SP", type: "Estatal", deposit: 4800000000, accumulatedYield: 0, apy: 13.65 },
+            { name: "FUNDAÇÃO CESP (FUNAP)", type: "Fundação Patrocinada", deposit: 3900000000, accumulatedYield: 0, apy: 13.65 },
+            { name: "GRUPO LOGÍSTICA INTEGRADA", type: "Logística", deposit: 6250000000, accumulatedYield: 0, apy: 13.65 }
+        ];
+        const totalDeposit = fundAccounts.reduce((s, a) => s + a.deposit, 0);
+        const CDI_ANUAL = 13.65, DIAS_UTEIS = 252;
+        const TAXA_DIARIA = (CDI_ANUAL / 100) / DIAS_UTEIS;
+        const dailyYieldTotal = totalDeposit * TAXA_DIARIA;
+        fundAccounts.forEach(acc => {
+            acc.participation = (acc.deposit / totalDeposit) * 100;
+            acc.dailyYield = acc.deposit * TAXA_DIARIA;
+            acc.accumulatedYield = acc.dailyYield * 30;
+        });
+        let totalAccumulated = fundAccounts.reduce((s, a) => s + a.accumulatedYield, 0);
+        let lastTimestamp = Date.now();
+
+        function renderFundTable() {
+            const tbody = document.getElementById('accountsTableBody');
+            if (!tbody) return;
+            tbody.innerHTML = '';
+            fundAccounts.forEach(acc => {
+                const row = tbody.insertRow();
+                row.insertCell(0).innerHTML = `<strong>${acc.name}</strong>`;
+                row.insertCell(1).innerHTML = acc.type;
+                row.insertCell(2).innerHTML = `R$ ${acc.deposit.toLocaleString('pt-BR')}`;
+                row.insertCell(3).innerHTML = `<span class="positive-yield">R$ ${acc.accumulatedYield.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</span>`;
+                row.insertCell(4).innerHTML = `R$ ${acc.dailyYield.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`;
+                row.insertCell(5).innerHTML = `${CDI_ANUAL}% a.a.`;
+                row.insertCell(6).innerHTML = `${acc.participation.toFixed(2)}%`;
+                row.insertCell(7).innerHTML = `<span class="badge-fund">Escrow Ativo</span>`;
+            });
         }
-        resizeCanvas();
-        window.addEventListener('resize', resizeCanvas);
-
-        // Matrix characters
-        const matrixChars = '01アイウエオカキクケコサシスセソタチツテトナニヌネノハヒフヘホマミムメモヤユヨラリルレロワヰヱヲン01';
-        const fontSize = 14;
-        let columns = Math.floor(canvas.width / fontSize);
-        let drops = [];
-
-        function initDrops() {
-            columns = Math.floor(canvas.width / fontSize);
-            drops = [];
-            for (let i = 0; i < columns; i++) {
-                drops[i] = Math.random() * -100;
+        function renderSummaryCards() {
+            const container = document.getElementById('summaryCards');
+            if (container) container.innerHTML = `
+                <div class="stat-card-dash"><div class="stat-label-dash">EMPRESAS/CONSÓRCIOS</div><div class="stat-number-dash">${fundAccounts.length}</div></div>
+                <div class="stat-card-dash"><div class="stat-label-dash">PATRIMÔNIO TOTAL SOB CUSTÓDIA</div><div class="stat-number-dash">R$ ${totalDeposit.toLocaleString('pt-BR')}</div></div>
+                <div class="stat-card-dash"><div class="stat-label-dash">RENDIMENTO DIÁRIO (CDI)</div><div class="stat-number-dash">R$ ${dailyYieldTotal.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</div></div>
+                <div class="stat-card-dash"><div class="stat-label-dash">TAXA CDI ATUAL</div><div class="stat-number-dash">13.65% a.a.</div></div>
+            `;
+        }
+        let barChart, pieChart;
+        function initCharts() {
+            const labels = fundAccounts.map(a => a.name.length > 20 ? a.name.substring(0, 18) + '..' : a.name);
+            const yields = fundAccounts.map(a => a.accumulatedYield);
+            const deposits = fundAccounts.map(a => a.deposit);
+            const ctxBar = document.getElementById('yieldBarChart').getContext('2d');
+            const ctxPie = document.getElementById('depositPieChart').getContext('2d');
+            if (barChart) barChart.destroy();
+            if (pieChart) pieChart.destroy();
+            barChart = new Chart(ctxBar, {
+                type: 'bar',
+                data: { labels, datasets: [{ label: 'Rendimento Acumulado (R$)', data: yields, backgroundColor: '#00ff41', borderRadius: 6 }] },
+                options: { responsive: true, maintainAspectRatio: true, plugins: { legend: { labels: { color: '#88cc88' } }, tooltip: { callbacks: { label: (ctx) => `R$ ${ctx.raw.toLocaleString('pt-BR')}` } } } }
+            });
+            pieChart = new Chart(ctxPie, {
+                type: 'pie',
+                data: { labels, datasets: [{ data: deposits, backgroundColor: ['#00ff41', '#33cc33', '#66ff66', '#00cc66', '#2ecc71', '#27ae60', '#1e8a4a', '#0f6e3a', '#0c5c2e', '#08a844', '#3dd68c', '#5fe0a2'] }] },
+                options: { responsive: true, plugins: { legend: { position: 'bottom', labels: { color: '#bbffbb', font: { size: 9 } } } } }
+            });
+        }
+        function updateChartsData() {
+            if (barChart && pieChart) {
+                barChart.data.datasets[0].data = fundAccounts.map(a => a.accumulatedYield);
+                pieChart.data.datasets[0].data = fundAccounts.map(a => a.deposit);
+                barChart.update(); pieChart.update();
             }
         }
-        initDrops();
-        window.addEventListener('resize', initDrops);
-
-        function drawMatrix() {
-            // Semi-transparent black for trail effect
-            ctx.fillStyle = 'rgba(0, 0, 0, 0.05)';
-            ctx.fillRect(0, 0, canvas.width, canvas.height);
-
-            // Green text
-            ctx.fillStyle = '#00ff41';
-            ctx.font = `${fontSize}px 'JetBrains Mono', monospace`;
-
-            for (let i = 0; i < drops.length; i++) {
-                const char = matrixChars.charAt(Math.floor(Math.random() * matrixChars.length));
-                const x = i * fontSize;
-                const y = drops[i] * fontSize;
-
-                // Varying opacity for depth
-                ctx.globalAlpha = 0.3 + Math.random() * 0.7;
-                ctx.fillText(char, x, y);
-
-                // Reset drop or move down
-                if (drops[i] * fontSize > canvas.height && Math.random() > 0.975) {
-                    drops[i] = 0;
-                }
-                drops[i]++;
+        function updateCounterAndYields() {
+            const now = Date.now();
+            const delta = Math.min((now - lastTimestamp) / 1000, 2);
+            lastTimestamp = now;
+            if (delta > 0 && delta < 5) {
+                const yieldPerSec = dailyYieldTotal / 86400;
+                const inc = yieldPerSec * delta;
+                totalAccumulated += inc;
+                fundAccounts.forEach(acc => { acc.accumulatedYield += (acc.deposit / totalDeposit) * inc; });
+                const counter = document.getElementById('totalYieldCounter');
+                if (counter) counter.textContent = `R$ ${totalAccumulated.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`;
+                renderFundTable();
+                updateChartsData();
             }
-            ctx.globalAlpha = 1;
-            requestAnimationFrame(drawMatrix);
         }
-        drawMatrix();
+        function startRealtimeUpdates() { lastTimestamp = Date.now(); setInterval(updateCounterAndYields, 1000); }
 
-        // ===== MATRIX PARTICLES =====
-        const particlesContainer = document.getElementById('particles');
-        for (let i = 0; i < 40; i++) {
-            const particle = document.createElement('div');
-            particle.className = 'particle';
-            particle.style.left = Math.random() * 100 + '%';
-            particle.style.animationDuration = (Math.random() * 10 + 8) + 's';
-            particle.style.animationDelay = (Math.random() * 10) + 's';
-            particle.style.height = (Math.random() * 15 + 5) + 'px';
-            particlesContainer.appendChild(particle);
-        }
-
-        // ===== NAVBAR SCROLL EFFECT =====
-        const navbar = document.getElementById('navbar');
-        window.addEventListener('scroll', () => {
-            navbar.classList.toggle('scrolled', window.scrollY > 50);
-        });
-
-        // ===== MOBILE MENU =====
-        const mobileToggle = document.getElementById('mobileToggle');
-        const navLinks = document.getElementById('navLinks');
-        mobileToggle.addEventListener('click', () => {
-            navLinks.classList.toggle('active');
-        });
-        document.querySelectorAll('.nav-links a').forEach(link => {
-            link.addEventListener('click', () => {
-                navLinks.classList.remove('active');
-            });
-        });
-
-        // ===== INTERSECTION OBSERVER FOR ANIMATIONS =====
-        const observerOptions = { threshold: 0.1, rootMargin: '0px 0px -50px 0px' };
-        const observer = new IntersectionObserver((entries) => {
-            entries.forEach(entry => {
-                if (entry.isIntersecting) {
-                    entry.target.classList.add('visible');
-                }
-            });
-        }, observerOptions);
-        document.querySelectorAll('.fade-in, .layer-item').forEach(el => {
-            observer.observe(el);
-        });
-
-        // ===== FORM SUBMIT =====
-        function handleSubmit(e) {
-            e.preventDefault();
-            const btn = e.target.querySelector('button');
-            const originalText = btn.textContent;
-
-            btn.textContent = '[✓ ENVIADO]';
-            btn.style.background = '#00ff41';
-
-            e.target.reset();
-
-            setTimeout(() => {
-                btn.textContent = originalText;
-                btn.style.background = '';
-            }, 4000);
-        }
-
-        // ===== SMOOTH SCROLL =====
+        const observer = new IntersectionObserver((entries) => { entries.forEach(e => { if (e.isIntersecting) e.target.classList.add('visible'); }); }, { threshold: 0.1 });
+        document.querySelectorAll('.fade-in, .layer-item').forEach(el => observer.observe(el));
         document.querySelectorAll('a[href^="#"]').forEach(anchor => {
             anchor.addEventListener('click', function (e) {
                 e.preventDefault();
                 const target = document.querySelector(this.getAttribute('href'));
-                if (target) {
-                    target.scrollIntoView({ behavior: 'smooth', block: 'start' });
-                }
+                if (target) target.scrollIntoView({ behavior: 'smooth', block: 'start' });
             });
         });
+        window.addEventListener('scroll', () => { document.getElementById('navbar').classList.toggle('scrolled', window.scrollY > 50); });
+        const mobileToggle = document.getElementById('mobileToggle');
+        const navLinks = document.getElementById('navLinks');
+        if (mobileToggle) mobileToggle.addEventListener('click', () => navLinks.classList.toggle('active'));
+        document.querySelectorAll('.nav-links a').forEach(link => link.addEventListener('click', () => navLinks.classList.remove('active')));
 
-        // ===== INITIALIZE ANIMATIONS =====
-        document.addEventListener('DOMContentLoaded', () => {
-            document.querySelectorAll('.fade-in').forEach(el => {
-                if (el.getBoundingClientRect().top < window.innerHeight * 0.9) {
-                    el.classList.add('visible');
-                }
-            });
+        window.addEventListener('DOMContentLoaded', () => {
+            renderFundTable(); renderSummaryCards(); initCharts(); startRealtimeUpdates();
+            document.querySelectorAll('.fade-in').forEach(el => { if (el.getBoundingClientRect().top < window.innerHeight * 0.9) el.classList.add('visible'); });
         });
     </script>
 </body>
