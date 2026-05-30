@@ -246,7 +246,7 @@ A plataforma foi projetada considerando:
 
 ---
 
-🎯 CHECKLIST VALUE
+## 🎯 CHECKLIST VALUE
 
 Pilar,Status,Evidência no Código
 
