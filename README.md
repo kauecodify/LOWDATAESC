@@ -1,6 +1,6 @@
 <img width="500" height="500" alt="lowdataesc" src="https://github.com/user-attachments/assets/ec9254b9-f4eb-40ff-abdd-343950260609" />
 
-# LOWDATAESC
+# LOWDATAESC 🇧🇷
 
 ## Plataforma de Dados Escalonados com Custódia Inteligente (Escrow)
 
