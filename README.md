@@ -19,12 +19,6 @@ A arquitetura foi desenvolvida sob o princípio **Zero Trust Security**, garanti
 
 ---
 
-📁 1. ESTRUTURA BACK/DATA/CI-CD
-
-<img width="477" height="361" alt="image" src="https://github.com/user-attachments/assets/4780e753-2a98-4342-b59d-98eb22288e7a" />
-
----
-
 # Arquitetura de Segurança
 
 ## Camada 1 — Validação de Identidade
@@ -181,6 +175,12 @@ Benefícios:
 * Prometheus
 * Grafana
 * ELK Stack
+
+
+## 📁 - ESTRUTURA BACK/DATA/CI-CD
+
+<img width="477" height="361" alt="image" src="https://github.com/user-attachments/assets/4780e753-2a98-4342-b59d-98eb22288e7a" />
+
 
 ---
 
