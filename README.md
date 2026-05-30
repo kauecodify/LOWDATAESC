@@ -113,6 +113,16 @@ Entre elas:
 * Detecção de emuladores;
 * Análise de comportamento anômalo.
 
+## O Poder do AES-256
+
+Combinações: Existem \(2^{256}\) chaves possíveis.
+
+Número: Isso equivale a um 1 seguido de 77 zeros.
+
+Tempo: Supercomputadores levariam bilhões de anos para adivinhar.
+
+Energia: O processo exigiria mais energia do que o Sol produz.
+
 ---
 
 ## Camada 6 — Contas Escrow
