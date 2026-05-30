@@ -190,7 +190,7 @@ A plataforma foi projetada considerando:
 
 ---
 
-# Diferenciais LOWDATAESC
+# Diferencial LOWDATAESC
 
 ✅ Dados escalonados de alta disponibilidade (serasa)
 
