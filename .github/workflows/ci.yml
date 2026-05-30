@@ -1,0 +1,54 @@
+name: CI/CD Pipeline
+on:
+  push:
+    branches: [main, staging]
+  pull_request:
+    branches: [main]
+
+jobs:
+  security-scan:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Snyk Security
+        uses: snyk/actions/node@master
+        env:
+          SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
+      - name: Trivy Image Scan
+        uses: aquasecurity/trivy-action@master
+        with:
+          image-ref: lowdataesc/${{ matrix.service }}:${{ github.sha }}
+          severity: CRITICAL,HIGH
+          exit-code: 1
+
+  load-test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Run k6
+        uses: grafana/k6-action@v0.2.0
+        with:
+          filename: tests/load/tx-service.js
+          flags: --summary-export=results.json
+      - name: Upload Results
+        uses: actions/upload-artifact@v3
+        with:
+          name: k6-results
+          path: results.json
+
+  deploy:
+    needs: [security-scan, load-test]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Terraform Plan
+        uses: hashicorp/terraform-github-actions@master
+        with:
+          tf_actions_version: 1.5.7
+          tf_actions_subcommand: plan
+          tf_actions_working_dir: infrastructure/terraform
+      - name: Helm Deploy
+        run: |
+          helm upgrade --install lowdataesc ./infrastructure/helm/lowdataesc \
+            --namespace production --create-namespace \
+            --set image.tag=${{ github.sha }}
