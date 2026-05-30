@@ -2,6 +2,8 @@
 
 # MVP - LOWDATAESC 🇧🇷
 
+https://lowdataesc.netlify.app
+
 ## Plataforma de Dados Escalonados com Custódia Inteligente (Escrow)
 
 ### Visão Geral
