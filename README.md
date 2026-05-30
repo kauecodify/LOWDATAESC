@@ -246,6 +246,28 @@ A plataforma foi projetada considerando:
 
 ---
 
+🎯 CHECKLIST VALUE
+
+Pilar,Status,Evidência no Código
+
+Zero Trust,✅,"mTLS via SPIFFE, OPA guard, Vault integration"
+
+Immutable Audit,✅,Rust service + S3 Object Lock + SHA-256
+
+AI Explainability,✅,SHAP integration + Evidently drift monitor
+
+LGPD/BCB Ready,✅,"DSR API, Consent Registry, Crypto-Wipe"
+
+Load Tested,✅,"k6 pipeline (5k TPS, p95<100ms)"
+
+Shift-Left Sec,✅,"Snyk, Trivy, OWASP ZAP no CI"
+
+Multi-AZ/DR,✅,"Terraform RDS multi-az, Kafka mirror, Route53"
+
+IP/Compliance Docs,,docs/threat-model.md", "compliance/iso27001-controls/
+
+---
+
 ## Slogan
 
 **LOWDATAESC**
