@@ -1,6 +1,6 @@
 <img width="500" height="500" alt="lowdataesc" src="https://github.com/user-attachments/assets/ec9254b9-f4eb-40ff-abdd-343950260609" />
 
-# LOWDATAESC 🇧🇷
+# MVP - LOWDATAESC 🇧🇷
 
 ## Plataforma de Dados Escalonados com Custódia Inteligente (Escrow)
 
@@ -180,6 +180,36 @@ Benefícios:
 ## 📁 - ESTRUTURA BACK/DATA/CI-CD
 
 <img width="477" height="361" alt="image" src="https://github.com/user-attachments/assets/4780e753-2a98-4342-b59d-98eb22288e7a" />
+
+## 🚀 DEPLOY
+
+# 1. Setup Infra
+
+cd infrastructure/terraform
+
+terraform init && terraform plan -var-file=env/sa-east-1.tfvars
+
+terraform apply -auto-approve
+
+# 2. Build & Push Services
+
+docker build -t lowdataesc/auth:${COMMIT} services/auth-service
+
+docker push lowdataesc/auth:${COMMIT}
+
+# 3. Deploy via Helm
+
+helm upgrade --install lowdataesc ./infrastructure/helm/lowdataesc \
+
+  --set image.tag=${COMMIT} --namespace production
+
+# 4. Verify Health & Compliance
+
+kubectl get pods -n production
+
+curl http://localhost:3000/health
+
+curl http://localhost:8080/audit/v1/log -d '{"event":"boot","service":"audit"}'
 
 
 ---
