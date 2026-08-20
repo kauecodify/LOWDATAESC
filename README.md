@@ -2,7 +2,9 @@
 
 # MVP - LOWDATAESC 🇧🇷
 
-https://lowdataesc.netlify.app
+# SITE > https://lowdataesc.netlify.app
+
+# PITCHDECK > https://gamma.app/docs/Dados-protegidos-Valor-escalonado-Confianca-institucional-q00n1qy9kqer6hu
 
 ## Plataforma de Dados Escalonados com Custódia Inteligente (Escrow)
 
