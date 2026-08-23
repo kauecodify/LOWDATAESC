@@ -1,0 +1,23 @@
+FROM node:20-slim
+
+WORKDIR /app
+
+RUN apt-get update && apt-get install -y \
+    curl \
+    && rm -rf /var/lib/apt/lists/*
+
+COPY package*.json ./
+
+RUN npm ci --only=production
+
+# Copy typescript
+COPY orbital-custody-orchestrator.service.ts .
+COPY tsconfig.json .
+
+# Compila TypeScript
+RUN npm install -g typescript ts-node
+RUN tsc orbital-custody-orchestrator.service.ts --outDir dist --module commonjs --target es2020 --esModuleInterop
+
+EXPOSE 3000
+
+CMD ["node", "dist/orbital-custody-orchestrator.service.js"]
