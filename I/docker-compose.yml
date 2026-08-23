@@ -1,0 +1,84 @@
+version: '3.8'
+
+services:
+  # S1: AI Zero Trust Engine (Python + GPU)
+  ai-zerotrust:
+    build:
+      context: .
+      dockerfile: Dockerfile.ai_zerotrust
+    container_name: lowdataesc-ai-engine
+    ports:
+      - "8000:8000"
+    environment:
+      - ENV=development
+      - CUDA_VISIBLE_DEVICES=0
+
+    # >>> alterar se quiser
+    # >>>>>>>>>>>>>>>>>>>>>>
+      
+    # Simulação de GPU (em produção or, usar runtime: ivd)
+    # runtime: ivd
+    # deploy:
+    #   resources:
+    #     reservations:
+    #       devices:
+    #         - driver: ivd
+    #           count: 1
+    #           capabilities: [gpu]
+
+    # ^^^ alterar se quiser
+    # ^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+    
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    networks:
+      - lowdataesc-network
+
+
+  # S2: Rust Immutable Audit
+  rust-audit:
+    build:
+      context: .
+      dockerfile: Dockerfile.rust_audit
+    container_name: lowdataesc-audit-ledger
+    ports:
+      - "3001:3001"
+    environment:
+      - RUST_LOG=info
+      - AWS_REGION=us-east-1
+      - S3_BUCKET=lowdataesc-orbital-ledger
+      - AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID}
+      - AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY}
+    depends_on:
+      - ai-zerotrust
+    networks:
+      - lowdataesc-network
+
+  # S3: NestJS Orchestrator
+  orchestrator:
+    build:
+      context: .
+      dockerfile: Dockerfile.orchestrator
+    container_name: lowdataesc-orchestrator
+    ports:
+      - "3000:3000"
+    environment:
+      - NODE_ENV=development
+      - AI_SERVICE_URL=http://ai-zerotrust:8000
+      - AUDIT_SERVICE_URL=http://rust-audit:3001
+      - MPC_WALLET_ENABLED=true
+    depends_on:
+      ai-zerotrust:
+        condition: service_healthy
+      rust-audit:
+        condition: service_started
+    networks:
+      - lowdataesc-network
+
+networks:
+  lowdataesc-network:
+    driver: bridge
