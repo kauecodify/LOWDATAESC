@@ -1,0 +1,40 @@
+# lowdataesc-ai-edge-deployment.yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: lowdataesc-ai-zerotrust
+  namespace: financial-edge
+  labels:
+    app: lowdataesc-ai
+    tier: orbital-gpu
+spec:
+  replicas: 1 # No espaço, a redundância é feita por nós físicos diferentes, não réplicas no mesmo nó
+  selector:
+    matchLabels:
+      app: lowdataesc-ai
+  template:
+    metadata:
+      labels:
+        app: lowdataesc-ai
+    spec:
+      containers:
+      - name: python-ai-engine
+        image: lowdataesc/ai-zerotrust:orbital-v1.2
+        resources:
+          limits:
+            # ALOCAÇÃO CIRÚRGICA: Reserva a H100 para inferência de biometria comportamental
+            nvidia.com/gpu: 1 
+            memory: "32Gi"
+            cpu: "8"
+        env:
+        - name: ORBITAL_NODE_ID
+          valueFrom:
+            fieldRef:
+              fieldPath: spec.nodeName
+        - name: CUDA_VISIBLE_DEVICES
+          value: "0"
+      # Tolerância para nós de borda espacial (latência de comunicação com ground station)
+      tolerations:
+      - key: "orbital-edge"
+        operator: "Exists"
+        effect: "NoSchedule"
