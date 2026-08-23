@@ -1,0 +1,3 @@
+   docker-compose logs -f ai-zerotrust
+   docker-compose logs -f rust-audit
+   docker-compose logs -f orchestrator
