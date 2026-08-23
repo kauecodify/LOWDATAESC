@@ -1,0 +1,29 @@
+# Dockerfile.rust_audit
+# Build stage
+FROM rust:1.75-slim as builder
+
+WORKDIR /app
+
+COPY rust_immutable_audit.rs .
+COPY Cargo.toml .
+
+# Builda em release mode
+RUN cargo build --release
+
+# Runtime stage (imagem mínima)
+FROM debian:bookworm-slim
+
+WORKDIR /app
+
+# Instala dependências mínimas
+RUN apt-get update && apt-get install -y \
+    ca-certificates \
+    && rm -rf /var/lib/apt/lists/*
+
+# Copia o binário compilado
+COPY --from=builder /app/target/release/rust_immutable_audit .
+
+EXPOSE 3001
+
+# Roda o binário
+CMD ["./rust_immutable_audit"]
