@@ -1,22 +1,5 @@
 # --- PRIVATEFUNDS ---
 
-LOWDATAESC/
-├── README.md
-├── docker-compose.yml
-├── .env
-├── Dockerfile.ai_zerotrust
-├── Dockerfile.rust_audit
-├── Dockerfile.orchestrator
-├── ai_zerotrust_engine.py
-├── rust_immutable_audit.rs
-├── orbital-custody-orchestrator.service.ts
-├── requirements.txt
-├── Cargo.toml
-├── package.json
-└── tsconfig.json
-
-# --- PRIVATEFUNDS ---
-
 O foco aqui é demonstrar como o código resolve os problemas físicos e regulatórios do ambiente orbital (latência, desconexão, isolamento de hardware e compliance).
 
 1. ai_zerotrust_engine.py (O Motor de Inferência)
