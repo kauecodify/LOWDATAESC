@@ -1,0 +1,1520 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <meta name="description" content="LOWDATAESC — Plataforma de Dados Escalonados com Custódia Inteligente, Cash Pooling Global e Revenue Share">
+    <title>LOWDATAESC | FundInvest ® Global</title>
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        :root {
+            --bg-primary: #000000;
+            --bg-secondary: #030a03;
+            --bg-card: #0a1a0a;
+            --bg-card-hover: #0d250d;
+            --matrix-green: #00ff41;
+            --matrix-green-dim: #00cc33;
+            --matrix-green-glow: rgba(0, 255, 65, 0.4);
+            --matrix-green-soft: rgba(0, 255, 65, 0.1);
+            --text-primary: #e0ffe0;
+            --text-secondary: #88cc88;
+            --text-muted: #448844;
+            --border-color: #004411;
+            --glow-soft: 0 0 15px rgba(0, 255, 65, 0.3);
+            --glow-strong: 0 0 20px rgba(0, 255, 65, 0.5), 0 0 40px rgba(0, 255, 65, 0.2);
+            --gradient-matrix: linear-gradient(135deg, #00ff41, #00cc33, #009922);
+            --gradient-br: linear-gradient(135deg, #009c3b, #ffdf00, #002776);
+            --font-display: 'Space Grotesk', system-ui, sans-serif;
+            --font-mono: 'JetBrains Mono', 'Fira Code', monospace;
+            --font-body: 'Inter', sans-serif;
+            --touch-target: 44px;
+            --color-gbp: #0055a4;
+            --color-eur: #5b3a8e;
+            --color-cny: #de2910;
+            --color-rub: #d52b1e;
+        }
+        
+        body {
+            font-family: var(--font-body);
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            overflow-x: hidden;
+            line-height: 1.5;
+            -webkit-tap-highlight-color: transparent;
+        }
+        
+        body::before {
+            content: '';
+            position: fixed;
+            inset: 0;
+            background: radial-gradient(ellipse at 20% 80%, rgba(0, 255, 65, 0.03) 0%, transparent 50%), radial-gradient(ellipse at 80% 20%, rgba(0, 255, 65, 0.02) 0%, transparent 50%);
+            pointer-events: none;
+            z-index: -2;
+        }
+        
+        body::after {
+            content: '';
+            position: fixed;
+            inset: 0;
+            background: repeating-linear-gradient(0deg, rgba(0, 0, 0, 0.1) 0px, rgba(0, 0, 0, 0.1) 1px, transparent 1px, transparent 2px);
+            pointer-events: none;
+            z-index: 1000;
+            opacity: 0.2;
+        }
+        
+        ::-webkit-scrollbar {
+            width: 6px;
+        }
+        
+        ::-webkit-scrollbar-track {
+            background: var(--bg-secondary);
+        }
+        
+        ::-webkit-scrollbar-thumb {
+            background: var(--matrix-green-dim);
+            border-radius: 4px;
+        }
+        
+        button,
+        .btn-primary,
+        .btn-secondary,
+        .nav-cta,
+        .mobile-toggle,
+        .nav-item,
+        .currency-select {
+            cursor: pointer;
+            touch-action: manipulation;
+        }
+        
+        .gradient-text {
+            color: var(--matrix-green);
+            text-shadow: 0 0 20px rgba(0, 255, 65, 0.6);
+        }
+        
+        .text-glow-strong {
+            text-shadow: 0 0 20px rgba(0, 255, 65, 0.8), 0 0 40px rgba(0, 255, 65, 0.4);
+        }
+        
+        .navbar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 1000;
+            padding: 0.8rem 1.5rem;
+            background: rgba(0, 10, 0, 0.95);
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid var(--border-color);
+            transition: all 0.3s ease;
+        }
+        
+        .navbar.scrolled {
+            padding: 0.5rem 1.5rem;
+            background: rgba(0, 5, 0, 0.98);
+            box-shadow: var(--glow-soft);
+        }
+        
+        .nav-container {
+            max-width: 1280px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 1rem;
+        }
+        
+        .logo-text {
+            font-family: var(--font-mono);
+            font-size: clamp(1.1rem, 5vw, 1.3rem);
+            font-weight: 700;
+            color: var(--matrix-green);
+            text-shadow: 0 0 10px rgba(0, 255, 65, 0.5);
+            white-space: nowrap;
+        }
+        
+        .logo-badge {
+            font-family: var(--font-mono);
+            font-size: 0.65rem;
+            padding: 2px 6px;
+            background: var(--gradient-br);
+            border-radius: 4px;
+            color: #fff;
+            margin-left: 4px;
+        }
+        
+        .nav-links {
+            display: flex;
+            align-items: center;
+            gap: 1.2rem;
+            list-style: none;
+        }
+        
+        .nav-links a {
+            font-family: var(--font-mono);
+            color: var(--text-secondary);
+            text-decoration: none;
+            font-size: 0.8rem;
+            transition: 0.2s;
+            padding: 0.5rem 0;
+        }
+        
+        .nav-links a:hover {
+            color: var(--matrix-green);
+            text-shadow: 0 0 8px var(--matrix-green-glow);
+        }
+        
+        .nav-cta {
+            padding: 0.4rem 1rem;
+            background: var(--gradient-matrix);
+            color: #000 !important;
+            border-radius: 6px;
+            font-weight: 700 !important;
+        }
+        
+        .currency-select {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            color: var(--matrix-green);
+            font-family: var(--font-mono);
+            font-size: 0.8rem;
+            padding: 0.4rem 0.8rem;
+            border-radius: 6px;
+            outline: none;
+        }
+        
+        .currency-select:focus {
+            border-color: var(--matrix-green);
+            box-shadow: var(--glow-soft);
+        }
+        
+        .mobile-toggle {
+            display: none;
+            flex-direction: column;
+            gap: 4px;
+            background: none;
+            border: 1px solid var(--border-color);
+            padding: 6px;
+            border-radius: 6px;
+            width: 36px;
+            height: 36px;
+            justify-content: center;
+            align-items: center;
+        }
+        
+        .mobile-toggle span {
+            width: 20px;
+            height: 2px;
+            background: var(--matrix-green);
+            display: block;
+        }
+        
+        .hero {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 6rem 1.5rem 3rem;
+            text-align: center;
+        }
+        
+        .hero-content {
+            max-width: 900px;
+            width: 100%;
+        }
+        
+        .hero-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.4rem 1rem;
+            background: var(--matrix-green-soft);
+            border: 1px solid rgba(0, 255, 65, 0.3);
+            border-radius: 50px;
+            font-family: var(--font-mono);
+            font-size: 0.7rem;
+            font-weight: 600;
+            color: var(--matrix-green);
+            margin-bottom: 1.5rem;
+        }
+        
+        .hero-badge .pulse {
+            width: 8px;
+            height: 8px;
+            background: var(--matrix-green);
+            border-radius: 50%;
+            animation: pulse 2s infinite;
+        }
+        
+        @keyframes pulse {
+            0%,
+            100% {
+                opacity: 1;
+                transform: scale(1);
+            }
+            50% {
+                opacity: 0.6;
+                transform: scale(1.3);
+            }
+        }
+        
+        .hero-title {
+            font-family: var(--font-display);
+            font-size: clamp(2rem, 7vw, 4rem);
+            font-weight: 700;
+            line-height: 1.2;
+            margin-bottom: 1rem;
+        }
+        
+        .hero-subtitle {
+            font-size: clamp(0.9rem, 3vw, 1.1rem);
+            color: var(--text-secondary);
+            max-width: 650px;
+            margin: 0 auto 1.5rem;
+        }
+        
+        .hero-actions {
+            display: flex;
+            gap: 1rem;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+        
+        .btn-primary,
+        .btn-secondary {
+            display: inline-flex;
+            padding: 0.8rem 1.8rem;
+            border-radius: 8px;
+            font-family: var(--font-mono);
+            font-weight: 700;
+            text-decoration: none;
+            transition: 0.2s;
+            font-size: 0.9rem;
+            min-height: var(--touch-target);
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .btn-primary {
+            background: var(--gradient-matrix);
+            color: #000;
+            border: 1px solid var(--matrix-green);
+            box-shadow: var(--glow-soft);
+        }
+        
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--glow-strong);
+        }
+        
+        .btn-secondary {
+            background: transparent;
+            color: var(--matrix-green);
+            border: 1px solid var(--border-color);
+        }
+        
+        .btn-secondary:hover {
+            border-color: var(--matrix-green);
+            background: var(--matrix-green-soft);
+        }
+        
+        .hero-stats {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 1rem;
+            margin-top: 3rem;
+        }
+        
+        .stat-item {
+            text-align: center;
+            min-width: 90px;
+            padding: 0.6rem;
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: 10px;
+        }
+        
+        .stat-number {
+            font-family: var(--font-mono);
+            font-size: 1.2rem;
+            font-weight: 700;
+            color: var(--matrix-green);
+        }
+        
+        .stat-label {
+            font-family: var(--font-mono);
+            font-size: 0.6rem;
+            color: var(--text-muted);
+            letter-spacing: 0.1em;
+        }
+        
+        section {
+            padding: 4rem 1.5rem;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        
+        .section-label {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-family: var(--font-mono);
+            font-size: 0.7rem;
+            letter-spacing: 0.2em;
+            color: var(--matrix-green);
+            margin-bottom: 1rem;
+        }
+        
+        .section-label::before {
+            content: '';
+            width: 30px;
+            height: 2px;
+            background: var(--gradient-matrix);
+        }
+        
+        .section-title {
+            font-family: var(--font-display);
+            font-size: clamp(1.8rem, 5vw, 2.5rem);
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+        }
+        
+        .features-grid,
+        .arch-grid,
+        .diff-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 1.2rem;
+        }
+        
+        .feature-card,
+        .arch-card,
+        .diff-item {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: 16px;
+            padding: 1.5rem;
+            transition: 0.2s;
+        }
+        
+        .feature-card:hover,
+        .arch-card:hover,
+        .diff-item:hover {
+            border-color: var(--matrix-green);
+            transform: translateY(-4px);
+            box-shadow: var(--glow-soft);
+        }
+        
+        .fund-dashboard {
+            background: var(--bg-secondary);
+            border-top: 1px solid var(--border-color);
+            border-bottom: 1px solid var(--border-color);
+            padding: 2rem 1rem;
+        }
+        
+        .dashboard-container {
+            max-width: 1300px;
+            margin: 0 auto;
+        }
+        
+        .stats-grid-dash {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            margin: 1.5rem 0;
+        }
+        
+        .stat-card-dash {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: 20px;
+            padding: 1rem;
+        }
+        
+        .stat-label-dash {
+            font-family: var(--font-mono);
+            font-size: 0.65rem;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            color: var(--text-muted);
+        }
+        
+        .stat-number-dash {
+            font-family: var(--font-display);
+            font-size: 1.6rem;
+            font-weight: 700;
+            color: var(--matrix-green);
+        }
+        
+        .accounts-table-wrapper {
+            background: var(--bg-card);
+            border-radius: 20px;
+            border: 1px solid var(--border-color);
+            overflow-x: auto;
+            margin: 1.5rem 0;
+        }
+        
+        .accounts-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-family: var(--font-mono);
+            font-size: 0.75rem;
+            min-width: 900px;
+        }
+        
+        .accounts-table th {
+            text-align: left;
+            padding: 0.8rem;
+            background: rgba(0, 255, 65, 0.05);
+            border-bottom: 1px solid var(--border-color);
+            color: var(--matrix-green);
+        }
+        
+        .accounts-table td {
+            padding: 0.8rem;
+            border-bottom: 1px solid rgba(0, 68, 17, 0.3);
+            color: var(--text-secondary);
+        }
+        
+        .accounts-table tr:hover td {
+            background: var(--bg-card-hover);
+            color: var(--text-primary);
+        }
+        
+        .badge-fund {
+            display: inline-block;
+            background: rgba(0, 255, 65, 0.15);
+            padding: 0.2rem 0.5rem;
+            border-radius: 30px;
+            font-size: 0.65rem;
+            border: 1px solid rgba(0, 255, 65, 0.3);
+            color: var(--matrix-green);
+        }
+        
+        .positive-yield {
+            color: var(--matrix-green);
+            font-weight: 600;
+        }
+        
+        .chart-row {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 1rem;
+            margin: 1.5rem 0;
+        }
+        
+        .chart-box {
+            flex: 1;
+            min-width: 260px;
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: 20px;
+            padding: 1rem;
+        }
+        
+        canvas {
+            max-height: 280px;
+            width: 100%;
+        }
+        
+        .insight-note {
+            background: rgba(0, 255, 65, 0.03);
+            border-left: 3px solid var(--matrix-green);
+            padding: 1rem;
+            border-radius: 12px;
+            font-family: var(--font-mono);
+            font-size: 0.75rem;
+            margin-top: 1rem;
+        }
+        
+        .cdi-counter {
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: #ffdf00;
+            text-shadow: 0 0 8px rgba(255, 223, 0, 0.5);
+            animation: pulse-gold 1.5s infinite;
+        }
+        
+        @keyframes pulse-gold {
+            0% {
+                opacity: 0.9;
+            }
+            100% {
+                opacity: 1;
+                text-shadow: 0 0 15px #ffdf00;
+            }
+        }
+        
+        .country-badge {
+            display: inline-block;
+            padding: 0.15rem 0.4rem;
+            border-radius: 4px;
+            font-size: 0.65rem;
+            font-weight: 700;
+            color: #fff;
+            margin-right: 0.3rem;
+        }
+        
+        .badge-br {
+            background: #009c3b;
+        }
+        
+        .badge-gbp {
+            background: var(--color-gbp);
+        }
+        
+        .badge-eur {
+            background: var(--color-eur);
+        }
+        
+        .badge-cny {
+            background: var(--color-cny);
+        }
+        
+        .badge-rub {
+            background: var(--color-rub);
+        }
+        
+        .cta {
+            padding: 4rem 1rem;
+            text-align: center;
+            background: var(--bg-secondary);
+        }
+        
+        .status-indicator {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.3rem 1rem;
+            background: var(--matrix-green-soft);
+            border-radius: 40px;
+            margin-bottom: 1.5rem;
+            font-size: 0.7rem;
+        }
+        
+        .mvp-highlights {
+            display: grid;
+            gap: 0.8rem;
+            margin: 1.5rem 0;
+        }
+        
+        .highlight-item {
+            padding: 0.8rem;
+            border: 1px solid rgba(0, 255, 150, .15);
+            background: rgba(0, 255, 150, .05);
+            border-radius: 12px;
+            font-size: 0.85rem;
+        }
+        
+        .cta-actions {
+            margin-top: 1.5rem;
+        }
+        
+        .cta-button {
+            display: inline-block;
+            padding: 0.8rem 1.8rem;
+            border-radius: 10px;
+            text-decoration: none;
+            font-weight: 600;
+            background: linear-gradient(135deg, #ff0000, #b00000);
+            color: #fff;
+            transition: 0.2s;
+            min-width: 180px;
+        }
+        
+        .cta-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 0 20px rgba(218, 58, 58, 0.5);
+        }
+        
+        .footer {
+            background: var(--bg-primary);
+            border-top: 1px solid var(--border-color);
+            padding: 2rem 1rem;
+            text-align: center;
+        }
+        
+        .footer-grid {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 1.5rem;
+        }
+        
+        .footer-col h4 {
+            font-family: var(--font-mono);
+            font-size: 0.7rem;
+            color: var(--matrix-green);
+            margin-bottom: 0.8rem;
+        }
+        
+        .footer-col ul {
+            list-style: none;
+        }
+        
+        .footer-col ul li a {
+            color: var(--text-secondary);
+            text-decoration: none;
+            font-size: 0.75rem;
+            line-height: 2;
+        }
+        
+        .footer-bottom {
+            margin-top: 2rem;
+            padding-top: 1.5rem;
+            border-top: 1px solid var(--border-color);
+            display: flex;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 0.8rem;
+            font-size: 0.7rem;
+        }
+        
+        .footer-socials a {
+            width: 32px;
+            height: 32px;
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--text-muted);
+            text-decoration: none;
+            margin: 0 0.2rem;
+            transition: 0.2s;
+        }
+        
+        .footer-socials a:hover {
+            border-color: var(--matrix-green);
+            color: var(--matrix-green);
+        }
+        
+        .fade-in {
+            opacity: 0;
+            transform: translateY(20px);
+            transition: all 0.6s ease;
+        }
+        
+        .fade-in.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+        
+        .restriction-banner {
+            background: linear-gradient(135deg, rgba(0, 68, 17, 0.3), rgba(0, 34, 8, 0.5));
+            border: 1px solid rgba(0, 255, 65, 0.3);
+            border-radius: 16px;
+            padding: 1.2rem;
+            margin: 1rem auto;
+            max-width: 800px;
+            text-align: center;
+        }
+        
+        .code-snippet {
+            font-family: var(--font-mono);
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: 10px;
+            padding: 0.8rem;
+            margin: 1rem 0 0;
+            font-size: 0.7rem;
+            text-align: left;
+            overflow-x: auto;
+        }
+        
+        .terminal-cursor {
+            display: inline-block;
+            width: 2px;
+            height: 1em;
+            background: var(--matrix-green);
+            margin-left: 2px;
+            animation: blink 1s step-end infinite;
+            vertical-align: middle;
+        }
+        
+        @keyframes blink {
+            0%,
+            100% {
+                opacity: 1;
+            }
+            50% {
+                opacity: 0;
+            }
+        }
+        
+        #matrix-canvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            opacity: 0.12;
+            pointer-events: none;
+        }
+        
+        @media (max-width: 768px) {
+            .nav-links {
+                display: none;
+                position: absolute;
+                top: 100%;
+                left: 0;
+                right: 0;
+                flex-direction: column;
+                background: rgba(0, 10, 0, 0.98);
+                padding: 1.2rem;
+                gap: 1rem;
+                border-bottom: 1px solid var(--border-color);
+            }
+            .nav-links.active {
+                display: flex;
+            }
+            .mobile-toggle {
+                display: flex;
+            }
+            .hero-stats {
+                gap: 0.8rem;
+            }
+            .stat-number {
+                font-size: 1rem;
+            }
+            .stat-label {
+                font-size: 0.5rem;
+            }
+            .stats-grid-dash {
+                grid-template-columns: 1fr;
+            }
+            .fund-section-title {
+                font-size: 1.4rem;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            .hero-actions {
+                flex-direction: column;
+                align-items: center;
+            }
+            .btn-primary,
+            .btn-secondary {
+                width: 100%;
+                max-width: 240px;
+            }
+            .chart-box {
+                min-width: 100%;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <canvas id="matrix-canvas"></canvas>
+    <nav class="navbar" id="navbar">
+        <div class="nav-container">
+            <a href="#" class="nav-logo"><span
+                        class="logo-text">LOWDATAESC<span
+                            class="logo-badge">GLOBAL</span></span></a>
+            <ul class="nav-links" id="navLinks">
+                <li><a href="#features">Recursos</a></li>
+                <li><a href="#security">Segurança</a></li>
+                <li><a href="#fund-accounts">Cash Pooling</a></li>
+                <li><a href="#architecture">Infraestrutura</a></li>
+                <li><a href="#contact" class="nav-cta">ACESSO</a></li>
+            </ul>
+            <select class="currency-select" id="currencySelector">
+                    <option value="BRL">BRL (R$)</option>
+                    <option value="GBP">GBP (£)</option>
+                    <option value="EUR">EUR (€)</option>
+                    <option value="CNY">CNY (¥)</option>
+                    <option value="RUB">RUB (₽)</option>
+                </select>
+            <button class="mobile-toggle" id="mobileToggle" aria-label="Menu"><span></span><span></span><span></span></button>
+        </div>
+    </nav>
+
+    <section class="hero" id="hero">
+        <div class="hero-content">
+            <div class="hero-badge"><span class="pulse"></span> SYSTEM_SECURE • ZERO_TRUST • MULTI_CURRENCY</div>
+            <h1 class="hero-title"><span class="text-glow-strong">./dados_protegidos</span><br><span class="gradient-text">./valor_escalonado</span><br>./confianca_institucional<span class="terminal-cursor"></span></h1>
+            <p class="hero-subtitle">Plataforma de otimização de Cash Pooling e Revenue Share com custódia inteligente, segurança Zero Trust e diversificação multicountry (BRL, GBP, EUR, CNY, RUB).<br><span style="font-family:var(--font-mono);color:var(--matrix-green-dim);">initialize_protocol
+                        --secure --global-mode</span></p>
+            <div class="hero-actions"><a href="#contact" class="btn-primary">SOLICITAR DEMO</a><a href="#security" class="btn-secondary">VER
+                        SEGURANÇA</a></div>
+            <div class="hero-stats">
+                <div class="stat-item">
+                    <div class="stat-number">99.99%</div>
+                    <div class="stat-label">UPTIME</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-number">AES-256</div>
+                    <div class="stat-label">CRYPTO</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-number">5</div>
+                    <div class="stat-label">MOEDAS</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-number">24/7</div>
+                    <div class="stat-label">MONITOR</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-number">KYC</div>
+                    <div class="stat-label">GLOBAL</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-number">SWIFT</div>
+                    <div class="stat-label">INTEGRATION</div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <div class="container">
+        <div class="restriction-banner fade-in">
+            <h4> ACCESS_RESTRICTED • GLOBAL_COMPLIANCE</h4>
+            <p>LOWDATAESC opera exclusivamente com transações homologadas entre entidades do grupo, otimizando liquidez via Cash Pooling e distribuindo Revenue Share conforme alocação setorial e geográfica.</p>
+            <div class="code-snippet">if (entity.isHomologated && pool.isVerified) {
+                <br>&nbsp;&nbsp;executeCashSweep();<br>&nbsp;&nbsp;distributeRevenueShare();<br>} else {<br>&nbsp;&nbsp;blockAndAlert();<br>}</div>
+        </div>
+    </div>
+
+    <section class="features" id="features">
+        <div class="container">
+            <div class="features-header fade-in">
+                <div class="section-label"> FEATURES</div>
+                <h2 class="section-title">Otimização <span class="gradient-text">Global de Capital</span></h2>
+                <p class="section-subtitle">Arquitetura financeira desenhada para maximizar yield e minimizar custo de oportunidade em múltiplas jurisdições.</p>
+            </div>
+            <div class="features-grid">
+                <div class="feature-card fade-in">
+                    <h3>Cash Pooling Notional</h3>
+                    <p>Consolidação virtual de saldos para cálculo de juros líquidos, sem movimentação física de fundos, reduzindo exposição cambial.</p>
+                </div>
+                <div class="feature-card fade-in">
+                    <h3>Revenue Share Dinâmico</h3>
+                    <p>Distribuição automática de rendimentos baseada em peso de contribuição, setor de atuação e risco-país.
+                    </p>
+                </div>
+                <div class="feature-card fade-in">
+                    <h3>Diversificação Setorial</h3>
+                    <p>Alocação estratégica entre Tecnologia, Energia, Agronegócio, Infraestrutura e Finanças para mitigação de risco sistêmico.</p>
+                </div>
+                <div class="feature-card fade-in">
+                    <h3>Zero Trust Security</h3>
+                    <p>Validações sucessivas de identidade, dispositivo, comportamento e autorização em todas as jurisdições.
+                    </p>
+                </div>
+                <div class="feature-card fade-in">
+                    <h3>Conformidade Multijurisdicional</h3>
+                    <p>Adaptação automática a LGPD (BR), GDPR (EUR), FCA (GBP) e regulamentações locais de CNY e RUB.</p>
+                </div>
+                <div class="feature-card fade-in">
+                    <h3>Auditoria Imutável</h3>
+                    <p>Trilha criptográfica de todas as operações de sweep e distribuição, garantindo transparência total.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="fund-dashboard" id="fund-accounts">
+        <div class="dashboard-container">
+            <div class="section-label"> GLOBAL_CASH_POOL • REVENUE_SHARE
+            </div>
+            <h2 class="fund-section-title">Painel de Otimização Multimoeda
+                <br><span class="gradient-text" id="globalPoolValue">Patrimônio total: R$
+                        0,00</span></h2>
+            <p style="color: var(--text-secondary); margin-bottom: 1rem;">Entidades globais fictícias — rendimentos atrelados às taxas locais (BRL: 13.65%, GBP: 5.25%, EUR: 3.90%, CNY: 3.50%, RUB: 16.00%) com conversão em tempo real.</p>
+
+            <div class="stats-grid-dash" id="summaryCards"></div>
+
+            <div class="stat-card-dash" style="text-align:center; margin-bottom:1.5rem;">
+                <div class="stat-label-dash">REVENUE SHARE ACUMULADO (ESTIMADO)
+                </div>
+                <div class="cdi-counter" id="totalYieldCounter">R$ 0,00
+                </div>
+                <div style="font-size:0.7rem;">atualizando a cada segundo • Yield ponderado por país e setor</div>
+            </div>
+
+            <div class="chart-row">
+                <div class="chart-box">
+                    <h4 style="color:var(--matrix-green); margin-bottom: 0.5rem;">Alocação por País (Cash Pool)</h4>
+                    <canvas id="countryPieChart"></canvas>
+                </div>
+                <div class="chart-box">
+                    <h4 style="color:var(--matrix-green); margin-bottom: 0.5rem;">Revenue Share por Setor</h4>
+                    <canvas id="sectorBarChart"></canvas>
+                </div>
+            </div>
+
+            <div class="accounts-table-wrapper">
+                <table class="accounts-table" id="fundAccountsTable">
+                    <thead>
+                        <tr>
+                            <th>Entidade / País</th>
+                            <th>Setor</th>
+                            <th>Moeda</th>
+                            <th>Saldo Aplicado</th>
+                            <th>Yield Local</th>
+                            <th>Revenue Share Acumulado</th>
+                            <th>Status</th>
+                        </tr>
+                    </thead>
+                    <tbody id="accountsTableBody"></tbody>
+                </table>
+            </div>
+            <div class="insight-note"><span style="color:var(--matrix-green);">OTIMIZAÇÃO:</span> O motor de Cash Pooling consolida posições para reduzir custo de dívida externa. O Revenue Share é calculado proporcionalmente ao saldo e ao yield local, convertido para a moeda base
+                de visualização.</div>
+        </div>
+    </section>
+
+    <section class="security" id="security">
+        <div class="container">
+            <div class="security-header fade-in">
+                <div class="section-label"> SECURITY_LAYERS</div>
+                <h2 class="section-title">Proteção <span class="gradient-text">Multijurisdicional</span></h2>
+                <p class="section-subtitle">Arquitetura multicamada garantindo proteção absoluta em cada etapa e fronteira.
+                </p>
+            </div>
+            <div class="layers-timeline">
+                <div class="layer-item">
+                    <div class="layer-number">01</div>
+                    <div class="layer-content">
+                        <h3>Validação de Identidade Global</h3>
+                        <p>KYC corporativo com validação cruzada em bases locais (Serasa, Companies House, etc.).</p>
+                    </div>
+                </div>
+                <div class="layer-item">
+                    <div class="layer-number">02</div>
+                    <div class="layer-content">
+                        <h3>Criptografia de Dados em Trânsito</h3>
+                        <p>TLS 1.3 e AES-256 para todas as comunicações entre nós globais.</p>
+                    </div>
+                </div>
+                <div class="layer-item">
+                    <div class="layer-number">03</div>
+                    <div class="layer-content">
+                        <h3>Motor de Conformidade (RegTech)</h3>
+                        <p>Verificação automática de sanções (OFAC, UE) e regras de lavagem de dinheiro (AML).</p>
+                    </div>
+                </div>
+                <div class="layer-item">
+                    <div class="layer-number">04</div>
+                    <div class="layer-content">
+                        <h3>Segregação Patrimonial (Escrow)</h3>
+                        <p>Contas ring-fenced em jurisdições estáveis, protegidas contra riscos operacionais locais.
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="architecture" id="architecture">
+        <div class="container">
+            <div class="arch-header fade-in">
+                <div class="section-label"> TECH_STACK</div>
+                <h2 class="section-title">Infraestrutura <span class="gradient-text">Tecnológica</span></h2>
+                <p class="section-subtitle">Stack moderna e robusta construída para alta frequência e baixa latência.</p>
+            </div>
+            <div class="arch-grid">
+                <div class="arch-card fade-in">
+                    <div class="arch-card-label">FRONTEND</div>
+                    <div class="tech-list"><span class="layer-tag">HTML5</span><span class="layer-tag">CSS3</span><span class="layer-tag">JavaScript</span></div>
+                </div>
+                <div class="arch-card fade-in">
+                    <div class="arch-card-label">BACKEND</div>
+                    <div class="tech-list"><span class="layer-tag">Node.js</span><span class="layer-tag">Python_IA</span><span class="layer-tag">Rust</span></div>
+                </div>
+                <div class="arch-card fade-in">
+                    <div class="arch-card-label">SECURITY</div>
+                    <div class="tech-list"><span class="layer-tag">AES-256</span><span class="layer-tag">TLS_1.3</span><span class="layer-tag">HSM</span></div>
+                </div>
+                <div class="arch-card fade-in">
+                    <div class="arch-card-label">GLOBAL</div>
+                    <div class="tech-list"><span class="layer-tag">SWIFT_API</span><span class="layer-tag">FOREX_FEED</span><span class="layer-tag">MULTI_LEDGER</span></div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="cta" id="contact">
+        <div class="cta-content">
+            <div class="status-indicator"><span class="dot" style="width:8px;height:8px;background:var(--matrix-green);border-radius:50%;display:inline-block;"></span> SYSTEM_STATUS: OPERATIONAL • GLOBAL_NODES_ACTIVE</div>
+            <h2 class="cta-title" style="margin-top:1.5rem">Pronto para otimizar seu <span class="gradient-text">capital
+                        global</span>?</h2>
+            <p class="cta-subtitle">Descubra por que a LOWDATAESC representa uma nova geração de custódia, cash pooling e revenue share.
+                <br><br><span style="font-family:var(--font-mono);color:var(--matrix-green-dim);">
+                        STATUS: MVP_OPERACIONAL</span></p>
+            <div class="mvp-highlights">
+                <div class="highlight-item">Consolidação de saldos multicountry em tempo real</div>
+                <div class="highlight-item">Distribuição automatizada de Revenue Share</div>
+                <div class="highlight-item">Diversificação inteligente por setor e jurisdição</div>
+                <div class="highlight-item">Conformidade regulatória global (LGPD, GDPR, FCA)</div>
+            </div>
+            <div class="cta-actions"><a href="#" class="cta-button">ACESSAR
+                        DEMO GLOBAL</a></div>
+            <p class="cta-note" style="margin-top: 1rem; color: var(--text-muted); font-size: 0.75rem;">Ambiente de demonstração • Dados simulados para fins de visualização
+            </p>
+        </div>
+    </section>
+
+    <footer class="footer">
+        <div class="footer-grid">
+            <div class="footer-brand"><span class="logo-text">LOWDATAESC
+                        GLOBAL</span>
+                <p style="font-size: 0.8rem; color: var(--text-secondary); margin-top: 0.5rem;">Dados protegidos. Valor escalonado. Confiança institucional sem fronteiras.</p>
+            </div>
+            <div class="footer-col">
+                <h4>PLATFORM</h4>
+                <ul>
+                    <li><a href="#features">Recursos</a></li>
+                    <li><a href="#security">Segurança</a></li>
+                    <li><a href="#fund-accounts">Cash Pooling</a></li>
+                </ul>
+            </div>
+            <div class="footer-col">
+                <h4>LEGAL</h4>
+                <ul>
+                    <li><a href="#">LGPD / GDPR</a></li>
+                    <li><a href="#">Termos Globais</a></li>
+                </ul>
+            </div>
+        </div>
+        <div class="footer-bottom">
+            <p>2025 LOWDATAESC Global • Todos os direitos reservados</p>
+            <div class="footer-socials"><a href="#">in</a><a href="#">X</a><a href="#">GH</a></div>
+        </div>
+    </footer>
+
+    <script>
+        (function() {
+            const canvas = document.getElementById('matrix-canvas');
+            if (!canvas) return;
+            const ctx = canvas.getContext('2d');
+
+            function resize() {
+                canvas.width = window.innerWidth;
+                canvas.height = window.innerHeight;
+            }
+            window.addEventListener('resize', resize);
+            resize();
+            const chars = "01アイウエオカキクケコサシスセソタチツテト";
+            const fontSize = 14;
+            let cols = Math.floor(canvas.width / fontSize);
+            let drops = [];
+
+            function init() {
+                cols = Math.floor(canvas.width / fontSize);
+                drops = [];
+                for (let i = 0; i < cols; i++) drops[i] = Math.random() * -100;
+            }
+            init();
+            window.addEventListener('resize', init);
+
+            function draw() {
+                ctx.fillStyle = 'rgba(0,0,0,0.05)';
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
+                ctx.fillStyle = '#00ff41';
+                ctx.font = fontSize + "px 'JetBrains Mono', monospace";
+                for (let i = 0; i < drops.length; i++) {
+                    let ch = chars[Math.floor(Math.random() * chars.length)];
+                    let x = i * fontSize,
+                        y = drops[i] * fontSize;
+                    ctx.globalAlpha = 0.2 + Math.random() * 0.5;
+                    ctx.fillText(ch, x, y);
+                    if (y > canvas.height && Math.random() > 0.975) drops[i] = 0;
+                    drops[i]++;
+                }
+                requestAnimationFrame(draw);
+            }
+            draw();
+        })();
+
+        const exchangeRates = {
+            BRL: 1,
+            GBP: 0.16,
+            EUR: 0.19,
+            CNY: 1.45,
+            RUB: 18.50
+        };
+        const currencySymbols = {
+            BRL: 'R$',
+            GBP: '£',
+            EUR: '€',
+            CNY: '¥',
+            RUB: '₽'
+        };
+        const countryYields = {
+            BRL: 13.65,
+            GBP: 5.25,
+            EUR: 3.90,
+            CNY: 3.50,
+            RUB: 16.00
+        };
+        const countryNames = {
+            BRL: 'Brasil',
+            GBP: 'Reino Unido',
+            EUR: 'Zona do Euro',
+            CNY: 'China',
+            RUB: 'Rússia'
+        };
+        const countryBadges = {
+            BRL: 'badge-br',
+            GBP: 'badge-gbp',
+            EUR: 'badge-eur',
+            CNY: 'badge-cny',
+            RUB: 'badge-rub'
+        };
+        const countryCodes = {
+            BRL: 'BR',
+            GBP: 'GB',
+            EUR: 'EU',
+            CNY: 'CN',
+            RUB: 'RU'
+        };
+
+        const globalPoolData = [{
+            name: "CONSÓRCIO NACIONAL DE ENERGIA",
+            country: "BRL",
+            sector: "Energia",
+            balanceBRL: 18500000000
+        }, {
+            name: "LONDON TECH HOLDINGS LTD",
+            country: "GBP",
+            sector: "Tecnologia",
+            balanceBRL: 9200000000
+        }, {
+            name: "EURO INFRASTRUCTURE FUND",
+            country: "EUR",
+            sector: "Infraestrutura",
+            balanceBRL: 11400000000
+        }, {
+            name: "SHANGHAI AGRO EXPORTS",
+            country: "CNY",
+            sector: "Agronegócio",
+            balanceBRL: 7800000000
+        }, {
+            name: "MOSCOW RESOURCES GROUP",
+            country: "RUB",
+            sector: "Energia",
+            balanceBRL: 6500000000
+        }, {
+            name: "BANCO REGIONAL SUL (BRS PAR)",
+            country: "BRL",
+            sector: "Finanças",
+            balanceBRL: 9800000000
+        }, {
+            name: "UK FINANCIAL SERVICES PLC",
+            country: "GBP",
+            sector: "Finanças",
+            balanceBRL: 5400000000
+        }, {
+            name: "BERLIN RENEWABLES GMBH",
+            country: "EUR",
+            sector: "Energia",
+            balanceBRL: 4300000000
+        }, {
+            name: "SHENZHEN HARDWARE CORP",
+            country: "CNY",
+            sector: "Tecnologia",
+            balanceBRL: 8100000000
+        }, {
+            name: "ST PETERSBURG LOGISTICS",
+            country: "RUB",
+            sector: "Infraestrutura",
+            balanceBRL: 3200000000
+        }, {
+            name: "HOLDING AGRO BRASIL (HAB)",
+            country: "BRL",
+            sector: "Agronegócio",
+            balanceBRL: 11200000000
+        }, {
+            name: "GLOBAL DATA ESCROW TRUST",
+            country: "GBP",
+            sector: "Tecnologia",
+            balanceBRL: 6700000000
+        }];
+
+        let currentCurrency = 'BRL';
+        let totalAccumulatedBRL = 0;
+        let lastTimestamp = Date.now();
+        let barChart, pieChart;
+
+        function formatMoney(valueBRL, currency) {
+            const converted = valueBRL * exchangeRates[currency];
+            return `${currencySymbols[currency]} ${converted.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+        }
+
+        function processData() {
+            let totalBalanceBRL = 0;
+            let totalDailyYieldBRL = 0;
+
+            globalPoolData.forEach(entity => {
+                const yieldRate = countryYields[entity.country] / 100;
+                const dailyYieldBRL = entity.balanceBRL * (yieldRate / 252);
+                entity.dailyYieldBRL = dailyYieldBRL;
+                entity.accumulatedYieldBRL = dailyYieldBRL * 30;
+                totalBalanceBRL += entity.balanceBRL;
+                totalDailyYieldBRL += dailyYieldBRL;
+            });
+
+            totalAccumulatedBRL = globalPoolData.reduce((sum, entity) => sum + entity.accumulatedYieldBRL, 0);
+            return {
+                totalBalanceBRL,
+                totalDailyYieldBRL
+            };
+        }
+
+        function renderDashboard() {
+            const {
+                totalBalanceBRL,
+                totalDailyYieldBRL
+            } = processData();
+
+            document.getElementById('globalPoolValue').textContent = `Patrimônio total: ${formatMoney(totalBalanceBRL, currentCurrency)}`;
+
+            const blendedYield = ((totalDailyYieldBRL * 252) / totalBalanceBRL * 100).toFixed(2);
+
+            document.getElementById('summaryCards').innerHTML = `
+            <div class="stat-card-dash"><div class="stat-label-dash">ENTIDADES ATIVAS</div><div class="stat-number-dash">${globalPoolData.length}</div></div>
+            <div class="stat-card-dash"><div class="stat-label-dash">PATRIMÔNIO TOTAL SOB CUSTÓDIA</div><div class="stat-number-dash">${formatMoney(totalBalanceBRL, currentCurrency)}</div></div>
+            <div class="stat-card-dash"><div class="stat-label-dash">RENDIMENTO DIÁRIO ESTIMADO</div><div class="stat-number-dash">${formatMoney(totalDailyYieldBRL, currentCurrency)}</div></div>
+            <div class="stat-card-dash"><div class="stat-label-dash">YIELD PONDERADO GLOBAL</div><div class="stat-number-dash">${blendedYield}% a.a.</div></div>
+        `;
+
+            const tbody = document.getElementById('accountsTableBody');
+            tbody.innerHTML = '';
+            globalPoolData.forEach(entity => {
+                const row = tbody.insertRow();
+                row.insertCell(0).innerHTML = `<span class="country-badge ${countryBadges[entity.country]}">${countryCodes[entity.country]}</span> <strong>${entity.name}</strong>`;
+                row.insertCell(1).innerHTML = entity.sector;
+                row.insertCell(2).innerHTML = entity.country;
+                row.insertCell(3).innerHTML = formatMoney(entity.balanceBRL, currentCurrency);
+                row.insertCell(4).innerHTML = `${countryYields[entity.country]}%`;
+                row.insertCell(5).innerHTML = `<span class="positive-yield">${formatMoney(entity.accumulatedYieldBRL, currentCurrency)}</span>`;
+                row.insertCell(6).innerHTML = `<span class="badge-fund">Pool Ativo</span>`;
+            });
+        }
+
+        function initCharts() {
+            const countryData = {};
+            const sectorData = {};
+
+            globalPoolData.forEach(entity => {
+                const countryName = countryNames[entity.country];
+                countryData[countryName] = (countryData[countryName] || 0) + entity.balanceBRL;
+
+                const sectorKey = `${entity.sector} (${entity.country})`;
+                sectorData[sectorKey] = (sectorData[sectorKey] || 0) + entity.accumulatedYieldBRL;
+            });
+
+            const countryLabels = Object.keys(countryData);
+            const countryValues = Object.values(countryData);
+            const countryColors = ['#009c3b', '#0055a4', '#5b3a8e', '#de2910', '#d52b1e'];
+
+            const sectorLabels = Object.keys(sectorData).map(k => k.length > 25 ? k.substring(0, 22) + '...' : k);
+            const sectorValues = Object.values(sectorData);
+
+            const ctxPie = document.getElementById('countryPieChart').getContext('2d');
+            const ctxBar = document.getElementById('sectorBarChart').getContext('2d');
+
+            if (pieChart) pieChart.destroy();
+            if (barChart) barChart.destroy();
+
+            pieChart = new Chart(ctxPie, {
+                type: 'doughnut',
+                data: {
+                    labels: countryLabels,
+                    datasets: [{
+                        data: countryValues,
+                        backgroundColor: countryColors,
+                        borderColor: '#0a1a0a',
+                        borderWidth: 2
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: true,
+                    plugins: {
+                        legend: {
+                            position: 'bottom',
+                            labels: {
+                                color: '#88cc88',
+                                font: {
+                                    size: 10
+                                }
+                            }
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    const val = context.raw * exchangeRates[currentCurrency];
+                                    return ` ${currencySymbols[currentCurrency]} ${val.toLocaleString('pt-BR', { maximumFractionDigits: 0 })}`;
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+
+            barChart = new Chart(ctxBar, {
+                type: 'bar',
+                data: {
+                    labels: sectorLabels,
+                    datasets: [{
+                        label: `Revenue Share Acumulado (${currentCurrency})`,
+                        data: sectorValues.map(v => v * exchangeRates[currentCurrency]),
+                        backgroundColor: '#00ff41',
+                        borderRadius: 4
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: true,
+                    scales: {
+                        y: {
+                            ticks: {
+                                color: '#88cc88',
+                                font: {
+                                    size: 10
+                                }
+                            },
+                            grid: {
+                                color: 'rgba(0, 255, 65, 0.1)'
+                            }
+                        },
+                        x: {
+                            ticks: {
+                                color: '#88cc88',
+                                font: {
+                                    size: 9
+                                },
+                                maxRotation: 45
+                            },
+                            grid: {
+                                display: false
+                            }
+                        }
+                    },
+                    plugins: {
+                        legend: {
+                            display: false
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    return ` ${currencySymbols[currentCurrency]} ${context.raw.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`;
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        function updateCounterAndYields() {
+            const now = Date.now();
+            const delta = Math.min((now - lastTimestamp) / 1000, 2);
+            lastTimestamp = now;
+
+            if (delta > 0 && delta < 5) {
+                const {
+                    totalDailyYieldBRL
+                } = processData();
+                const yieldPerSecBRL = totalDailyYieldBRL / 86400;
+                const incBRL = yieldPerSecBRL * delta;
+
+                totalAccumulatedBRL += incBRL;
+                globalPoolData.forEach(entity => {
+                    entity.accumulatedYieldBRL += (entity.dailyYieldBRL / totalDailyYieldBRL) * incBRL;
+                });
+
+                const counter = document.getElementById('totalYieldCounter');
+                if (counter) {
+                    counter.textContent = formatMoney(totalAccumulatedBRL, currentCurrency);
+                }
+
+                renderDashboard();
+
+                if (barChart) {
+                    const sectorData = {};
+                    globalPoolData.forEach(entity => {
+                        const sectorKey = `${entity.sector} (${entity.country})`;
+                        sectorData[sectorKey] = (sectorData[sectorKey] || 0) + entity.accumulatedYieldBRL;
+                    });
+                    barChart.data.datasets[0].data = Object.values(sectorData).map(v => v * exchangeRates[currentCurrency]);
+                    barChart.data.datasets[0].label = `Revenue Share Acumulado (${currentCurrency})`;
+                    barChart.update('none');
+                }
+            }
+        }
+
+        function startRealtimeUpdates() {
+            lastTimestamp = Date.now();
+            setInterval(updateCounterAndYields, 1000);
+        }
+
+        document.getElementById('currencySelector').addEventListener('change', (e) => {
+            currentCurrency = e.target.value;
+            renderDashboard();
+            initCharts();
+        });
+
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(e => {
+                if (e.isIntersecting) e.target.classList.add('visible');
+            });
+        }, {
+            threshold: 0.1
+        });
+
+        document.querySelectorAll('.fade-in, .layer-item').forEach(el => observer.observe(el));
+
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function(e) {
+                e.preventDefault();
+                const target = document.querySelector(this.getAttribute('href'));
+                if (target) target.scrollIntoView({
+                    behavior: 'smooth',
+                    block: 'start'
+                });
+            });
+        });
+
+        window.addEventListener('scroll', () => {
+            document.getElementById('navbar').classList.toggle('scrolled', window.scrollY > 50);
+        });
+
+        const mobileToggle = document.getElementById('mobileToggle');
+        const navLinks = document.getElementById('navLinks');
+        if (mobileToggle) {
+            mobileToggle.addEventListener('click', () => navLinks.classList.toggle('active'));
+        }
+        document.querySelectorAll('.nav-links a').forEach(link => {
+            link.addEventListener('click', () => navLinks.classList.remove('active'));
+        });
+
+        window.addEventListener('DOMContentLoaded', () => {
+            renderDashboard();
+            initCharts();
+            startRealtimeUpdates();
+            document.querySelectorAll('.fade-in').forEach(el => {
+                if (el.getBoundingClientRect().top < window.innerHeight * 0.9) el.classList.add('visible');
+            });
+        });
+    </script>
+</body>
+
+</html>
