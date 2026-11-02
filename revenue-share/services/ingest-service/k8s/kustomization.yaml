@@ -1,0 +1,88 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+metadata:
+  name: ingest-service
+  namespace: revenue-share
+  labels:
+    app: ingest-service
+    service: revenue-share
+    tier: backend
+    version: v1.0.0
+    tr8-compliant: "true"
+
+resources:
+  # Core Resources
+  - deployment.yaml
+  - service.yaml
+  - configmap.yaml
+  - secret.yaml
+  
+  # Networking
+  - ingress.yaml
+  - service-account.yaml
+  
+  # Autoscaling
+  - hpa.yaml
+  - pdb.yaml
+  
+  # Security
+  - network-policy.yaml
+
+# Common labels for all resources
+commonLabels:
+  app: ingest-service
+  service: revenue-share
+  tier: backend
+  version: v1.0.0
+  tr8-compliant: "true"
+
+# Namespace configuration
+namespace: revenue-share
+
+# Name prefix (optional)
+# namePrefix: ingest-
+
+# Field refs for configMapGenerator (if using configMapGenerator)
+# configMapGenerator:
+#   - name: ingest-service-config
+#     files:
+#       - application.properties
+
+# Secret generator (if using secretGenerator)
+# secretGenerator:
+#   - name: ingest-service-secrets
+#     literals:
+#       - DB_PASSWORD=secret
+
+# Patches for environment-specific configurations
+patches:
+  - path: patches/development.yaml
+    target:
+      kind: Deployment
+      name: ingest-service
+  
+  - path: patches/production.yaml
+    target:
+      kind: Deployment
+      name: ingest-service
+
+# Transformers (optional)
+# transformers:
+#   - labels.yaml
+#   - annotations.yaml
+
+# Generators (optional)
+# generators:
+#   - secret-generator.yaml
+
+# Images (optional override)
+# images:
+#   - name: registry.company.com/revenue-share/ingest-service
+#     newName: registry.company.com/revenue-share/ingest-service
+#     newTag: v1.0.0
+
+# Replicas (optional override)
+# replicas:
+#   - name: ingest-service
+#     count: 3

@@ -1,0 +1,81 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+# Metadata
+metadata:
+  name: liquidacao-service
+  namespace: revenue-share
+  labels:
+    app: liquidacao-service
+    service: revenue-share
+    tier: backend
+    version: v1.0.0
+    tr8-compliant: "true"
+    environment: production
+
+# Resources to include
+resources:
+  - deployment.yaml
+  - service.yaml
+  - configmap.yaml
+  - secret.yaml
+  - service-account.yaml
+  - ingress.yaml
+  - hpa.yaml
+  - pdb.yaml
+  - network-policy.yaml
+
+# ConfigMap generator (optional - for environment-specific values)
+configMapGenerator:
+  - name: liquidacao-service-env
+    behavior: merge
+    literals:
+      - SERVICE_ENVIRONMENT=production
+      - LOG_LEVEL=info
+
+# Secret generator (optional - for environment-specific secrets)
+# secretGenerator:
+#   - name: liquidacao-service-env-secrets
+#     behavior: merge
+#     literals:
+#       - DB_PASSWORD=secret
+
+# Patches for different environments
+patches:
+  # Development patches
+  - path: patches/dev.yaml
+    target:
+      kind: Deployment
+      name: liquidacao-service
+  
+  # Staging patches
+  - path: patches/staging.yaml
+    target:
+      kind: Deployment
+      name: liquidacao-service
+  
+  # Production patches
+  - path: patches/prod.yaml
+    target:
+      kind: Deployment
+      name: liquidacao-service
+
+# Images to use (can be overridden with --images flag)
+images:
+  - name: registry.company.com/revenue-share/liquidacao-service
+    newTag: v1.0.0
+
+# Common labels to add to all resources
+commonLabels:
+  app: liquidacao-service
+  service: revenue-share
+  tier: backend
+  version: v1.0.0
+  tr8-compliant: "true"
+  environment: production
+
+# Common annotations to add to all resources
+commonAnnotations:
+  description: "Revenue Share Liquidação Service"
+  maintainer: "Revenue Share Team"
+  support: "revenue-share@company.com"

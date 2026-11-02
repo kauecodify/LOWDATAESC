@@ -1,0 +1,302 @@
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: liquidacao-service-network-policy
+  namespace: revenue-share
+  labels:
+    app: liquidacao-service
+    service: revenue-share
+    tier: backend
+    version: v1.0.0
+    tr8-compliant: "true"
+    environment: production
+  annotations:
+    description: "Network Policy for Revenue Share Liquidação Service - Zero Trust"
+    maintainer: "Revenue Share Team"
+
+spec:
+  podSelector:
+    matchLabels:
+      app: liquidacao-service
+  
+  policyTypes:
+    - Ingress
+    - Egress
+  
+  # ============================================================================
+  # INGRESS RULES
+  # ============================================================================
+  ingress:
+    # Allow HTTP/HTTPS traffic from internal services
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              name: revenue-share
+          podSelector:
+            matchLabels:
+              app: ingest-service
+        - namespaceSelector:
+            matchLabels:
+              name: revenue-share
+          podSelector:
+            matchLabels:
+              app: calculation-service
+        - namespaceSelector:
+            matchLabels:
+              name: revenue-share
+          podSelector:
+            matchLabels:
+              app: workflow-service
+        - namespaceSelector:
+            matchLabels:
+              name: revenue-share
+          podSelector:
+            matchLabels:
+              app: reconciliation-service
+        - namespaceSelector:
+            matchLabels:
+              name: monitoring
+          podSelector:
+            matchLabels:
+              app: prometheus
+        - namespaceSelector:
+            matchLabels:
+              name: monitoring
+          podSelector:
+            matchLabels:
+              app: grafana
+        - ipBlock:
+            cidr: 10.0.0.0/8
+        - ipBlock:
+            cidr: 172.16.0.0/12
+        - ipBlock:
+            cidr: 192.168.0.0/16
+      ports:
+        - protocol: TCP
+          port: 8443
+        - protocol: TCP
+          port: 8080
+    
+    # Allow gRPC traffic from LOWDATAESC service
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              name: lowdataesc
+          podSelector:
+            matchLabels:
+              app: lowdataesc-service
+        - namespaceSelector:
+            matchLabels:
+              name: revenue-share
+          podSelector:
+            matchLabels:
+              app: calculation-service
+        - namespaceSelector:
+            matchLabels:
+              name: revenue-share
+          podSelector:
+            matchLabels:
+              app: workflow-service
+      ports:
+        - protocol: TCP
+          port: 50052
+    
+    # Allow health checks from ALB
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              name: kube-system
+          podSelector:
+            matchLabels:
+              k8s-app: aws-load-balancer-controller
+        - ipBlock:
+            cidr: 10.0.0.0/8
+      ports:
+        - protocol: TCP
+          port: 8443
+    
+    # Allow DNS queries
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              name: kube-system
+          podSelector:
+            matchLabels:
+              k8s-app: kube-dns
+      ports:
+        - protocol: UDP
+          port: 53
+        - protocol: TCP
+          port: 53
+
+  # ============================================================================
+  # EGRESS RULES
+  # ============================================================================
+  egress:
+    # Allow outbound HTTP/HTTPS traffic to internal services
+    - to:
+        - namespaceSelector:
+            matchLabels:
+              name: revenue-share
+          podSelector:
+            matchLabels:
+              app: ingest-service
+        - namespaceSelector:
+            matchLabels:
+              name: revenue-share
+          podSelector:
+            matchLabels:
+              app: calculation-service
+        - namespaceSelector:
+            matchLabels:
+              name: revenue-share
+          podSelector:
+            matchLabels:
+              app: workflow-service
+        - namespaceSelector:
+            matchLabels:
+              name: revenue-share
+          podSelector:
+            matchLabels:
+              app: reconciliation-service
+      ports:
+        - protocol: TCP
+          port: 8443
+        - protocol: TCP
+          port: 8080
+    
+    # Allow gRPC traffic to LOWDATAESC service
+    - to:
+        - namespaceSelector:
+            matchLabels:
+              name: lowdataesc
+          podSelector:
+            matchLabels:
+              app: lowdataesc-service
+      ports:
+        - protocol: TCP
+          port: 50051
+        - protocol: TCP
+          port: 50052
+    
+    # Allow PostgreSQL database access
+    - to:
+        - namespaceSelector:
+            matchLabels:
+              name: database
+          podSelector:
+            matchLabels:
+              app: postgres
+      ports:
+        - protocol: TCP
+          port: 5432
+    
+    # Allow Kafka access
+    - to:
+        - namespaceSelector:
+            matchLabels:
+              name: kafka
+          podSelector:
+            matchLabels:
+              app: kafka
+      ports:
+        - protocol: TCP
+          port: 9092
+        - protocol: TCP
+          port: 9093
+    
+    # Allow Redis access
+    - to:
+        - namespaceSelector:
+            matchLabels:
+              name: cache
+          podSelector:
+            matchLabels:
+              app: redis
+      ports:
+        - protocol: TCP
+          port: 6379
+    
+    # Allow Vault access
+    - to:
+        - namespaceSelector:
+            matchLabels:
+              name: vault
+          podSelector:
+            matchLabels:
+              app: vault
+      ports:
+        - protocol: TCP
+          port: 8200
+        - protocol: TCP
+          port: 8201
+    
+    # Allow DNS queries
+    - to:
+        - namespaceSelector:
+            matchLabels:
+              name: kube-system
+          podSelector:
+            matchLabels:
+              k8s-app: kube-dns
+      ports:
+        - protocol: UDP
+          port: 53
+        - protocol: TCP
+          port: 53
+    
+    # Allow Prometheus metrics scraping
+    - to:
+        - namespaceSelector:
+            matchLabels:
+              name: monitoring
+          podSelector:
+            matchLabels:
+              app: prometheus
+      ports:
+        - protocol: TCP
+          port: 9090
+    
+    # Allow Jaeger tracing
+    - to:
+        - namespaceSelector:
+            matchLabels:
+              name: monitoring
+          podSelector:
+            matchLabels:
+              app: jaeger
+      ports:
+        - protocol: TCP
+          port: 14268
+        - protocol: TCP
+          port: 14250
+
+---
+# Network policy to deny all traffic from non-revenue-share namespaces
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: liquidacao-service-deny-external
+  namespace: revenue-share
+  labels:
+    app: liquidacao-service
+    service: revenue-share
+    tier: backend
+    version: v1.0.0
+    tr8-compliant: "true"
+    environment: production
+  annotations:
+    description: "Deny all traffic from non-revenue-share namespaces"
+    maintainer: "Revenue Share Team"
+
+spec:
+  podSelector:
+    matchLabels:
+      app: liquidacao-service
+  
+  policyTypes:
+    - Ingress
+    - Egress
+  
+  ingress: []
+  egress: []

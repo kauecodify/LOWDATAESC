@@ -1,0 +1,27 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: ingest-service
+  namespace: revenue-share
+spec:
+  replicas: 1
+  template:
+    spec:
+      containers:
+        - name: ingest-service
+          resources:
+            requests:
+              cpu: "50m"
+              memory: "128Mi"
+            limits:
+              cpu: "200m"
+              memory: "256Mi"
+          env:
+            - name: NODE_ENV
+              value: "development"
+            - name: DB_SSL
+              value: "false"
+            - name: KAFKA_SSL
+              value: "false"
+            - name: MTLS_ENABLED
+              value: "false"

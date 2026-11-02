@@ -1,0 +1,908 @@
+openapi: 3.1.0
+info:
+  title: Revenue Share Module API
+  description: API do Modulo Revenue Share da LOWDATAESC
+  version: 1.0.0
+  contact:
+    name: LOWDATAESC Architecture Team
+    email: architecture@lowdataesc.com
+
+servers:
+  - url: https://api.lowdataesc.com/revenue-share/v1
+    description: Production
+  - url: https://staging-api.lowdataesc.com/revenue-share/v1
+    description: Staging
+
+security:
+  - mTLS: []
+  - bearerAuth: []
+
+paths:
+  /revenue-events:
+    post:
+      tags: [Revenue Events]
+      summary: Ingerir evento de receita
+      operationId: ingestRevenueEvent
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RevenueEventRequest'
+      responses:
+        '201':
+          description: Evento criado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RevenueEventResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '409':
+          description: Evento duplicado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+    get:
+      tags: [Revenue Events]
+      summary: Listar eventos
+      operationId: listRevenueEvents
+      parameters:
+        - name: page
+          in: query
+          schema: {type: integer, default: 1}
+        - name: limit
+          in: query
+          schema: {type: integer, default: 20, maximum: 100}
+      responses:
+        '200':
+          description: Lista de eventos
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RevenueEventList'
+
+  /revenue-events/{event_id}:
+    get:
+      tags: [Revenue Events]
+      summary: Consultar evento
+      operationId: getRevenueEvent
+      parameters:
+        - name: event_id
+          in: path
+          required: true
+          schema: {type: string, format: uuid}
+      responses:
+        '200':
+          description: Detalhes do evento
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RevenueEventResponse'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  /calculations:
+    post:
+      tags: [Calculations]
+      summary: Criar calculo
+      operationId: createCalculation
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CalculationRequest'
+      responses:
+        '201':
+          description: Calculo criado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CalculationResponse'
+    get:
+      tags: [Calculations]
+      summary: Listar calculos
+      operationId: listCalculations
+      parameters:
+        - name: page
+          in: query
+          schema: {type: integer, default: 1}
+        - name: limit
+          in: query
+          schema: {type: integer, default: 20, maximum: 100}
+      responses:
+        '200':
+          description: Lista de calculos
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CalculationList'
+
+  /calculations/{calculation_id}:
+    get:
+      tags: [Calculations]
+      summary: Consultar calculo
+      operationId: getCalculation
+      parameters:
+        - name: calculation_id
+          in: path
+          required: true
+          schema: {type: string, format: uuid}
+      responses:
+        '200':
+          description: Detalhes do calculo
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CalculationResponse'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  /calculations/{calculation_id}/submit:
+    post:
+      tags: [Calculations]
+      summary: Submeter calculo para aprovacao
+      operationId: submitCalculation
+      parameters:
+        - name: calculation_id
+          in: path
+          required: true
+          schema: {type: string, format: uuid}
+      responses:
+        '200':
+          description: Calculo submetido
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CalculationResponse'
+
+  /calculations/{calculation_id}/approve:
+    post:
+      tags: [Calculations]
+      summary: Aprovar calculo
+      operationId: approveCalculation
+      parameters:
+        - name: calculation_id
+          in: path
+          required: true
+          schema: {type: string, format: uuid}
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [approval_level, signature]
+              properties:
+                approval_level:
+                  type: string
+                  enum: [technical, business, financial, compliance]
+                signature:
+                  type: string
+      responses:
+        '200':
+          description: Calculo aprovado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CalculationResponse'
+
+  /settlement-instructions:
+    get:
+      tags: [Settlement Instructions]
+      summary: Listar instrucoes de liquidacao
+      operationId: listSettlementInstructions
+      parameters:
+        - name: page
+          in: query
+          schema: {type: integer, default: 1}
+        - name: limit
+          in: query
+          schema: {type: integer, default: 20, maximum: 100}
+      responses:
+        '200':
+          description: Lista de instrucoes
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SettlementInstructionList'
+
+  /settlement-instructions/{instruction_id}:
+    get:
+      tags: [Settlement Instructions]
+      summary: Consultar instrucao
+      operationId: getSettlementInstruction
+      parameters:
+        - name: instruction_id
+          in: path
+          required: true
+          schema: {type: string, format: uuid}
+      responses:
+        '200':
+          description: Detalhes da instrucao
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SettlementInstructionResponse'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  /distribution-matrices:
+    get:
+      tags: [Distribution Matrix]
+      summary: Listar matrizes
+      operationId: listDistributionMatrices
+      responses:
+        '200':
+          description: Lista de matrizes
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DistributionMatrixList'
+
+  /distribution-matrices/{matrix_id}:
+    get:
+      tags: [Distribution Matrix]
+      summary: Consultar matriz
+      operationId: getDistributionMatrix
+      parameters:
+        - name: matrix_id
+          in: path
+          required: true
+          schema: {type: string, format: uuid}
+      responses:
+        '200':
+          description: Detalhes da matriz
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DistributionMatrixResponse'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  /reconciliations:
+    post:
+      tags: [Reconciliations]
+      summary: Executar reconciliacao
+      operationId: createReconciliation
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ReconciliationRequest'
+      responses:
+        '201':
+          description: Reconciliacao criada
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ReconciliationResponse'
+    get:
+      tags: [Reconciliations]
+      summary: Listar reconciliacoes
+      operationId: listReconciliations
+      parameters:
+        - name: page
+          in: query
+          schema: {type: integer, default: 1}
+        - name: limit
+          in: query
+          schema: {type: integer, default: 20, maximum: 100}
+      responses:
+        '200':
+          description: Lista de reconciliacoes
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ReconciliationList'
+
+  /reconciliations/{reconciliation_id}:
+    get:
+      tags: [Reconciliations]
+      summary: Consultar reconciliacao
+      operationId: getReconciliation
+      parameters:
+        - name: reconciliation_id
+          in: path
+          required: true
+          schema: {type: string, format: uuid}
+      responses:
+        '200':
+          description: Detalhes da reconciliacao
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ReconciliationResponse'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  /disputes:
+    post:
+      tags: [Disputes]
+      summary: Abrir disputa
+      operationId: createDispute
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/DisputeRequest'
+      responses:
+        '201':
+          description: Disputa criada
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DisputeResponse'
+    get:
+      tags: [Disputes]
+      summary: Listar disputas
+      operationId: listDisputes
+      parameters:
+        - name: page
+          in: query
+          schema: {type: integer, default: 1}
+        - name: limit
+          in: query
+          schema: {type: integer, default: 20, maximum: 100}
+      responses:
+        '200':
+          description: Lista de disputas
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DisputeList'
+
+  /disputes/{dispute_id}:
+    get:
+      tags: [Disputes]
+      summary: Consultar disputa
+      operationId: getDispute
+      parameters:
+        - name: dispute_id
+          in: path
+          required: true
+          schema: {type: string, format: uuid}
+      responses:
+        '200':
+          description: Detalhes da disputa
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DisputeResponse'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  /disputes/{dispute_id}/resolve:
+    post:
+      tags: [Disputes]
+      summary: Resolver disputa
+      operationId: resolveDispute
+      parameters:
+        - name: dispute_id
+          in: path
+          required: true
+          schema: {type: string, format: uuid}
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [resolution, resolution_type, signature]
+              properties:
+                resolution:
+                  type: string
+                resolution_type:
+                  type: string
+                  enum: [recalculation, adjustment, no_action, compensation, other]
+                signature:
+                  type: string
+      responses:
+        '200':
+          description: Disputa resolvida
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DisputeResponse'
+
+  /participants:
+    get:
+      tags: [Participants]
+      summary: Listar participantes
+      operationId: listParticipants
+      parameters:
+        - name: page
+          in: query
+          schema: {type: integer, default: 1}
+        - name: limit
+          in: query
+          schema: {type: integer, default: 20, maximum: 100}
+      responses:
+        '200':
+          description: Lista de participantes
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ParticipantList'
+
+  /participants/{participant_id}:
+    get:
+      tags: [Participants]
+      summary: Consultar participante
+      operationId: getParticipant
+      parameters:
+        - name: participant_id
+          in: path
+          required: true
+          schema: {type: string, format: uuid}
+      responses:
+        '200':
+          description: Detalhes do participante
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ParticipantResponse'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  /health:
+    get:
+      tags: [Health]
+      summary: Health check
+      operationId: healthCheck
+      responses:
+        '200':
+          description: Servico saudavel
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HealthResponse'
+
+components:
+  securitySchemes:
+    mTLS:
+      type: mutualTLS
+      description: mTLS para comunicacao entre servicos
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      description: JWT para APIs externas
+
+  schemas:
+    RevenueEventRequest:
+      type: object
+      required: [event_id, operation_id, amount, currency, timestamp, type, jurisdiction, source]
+      properties:
+        event_id:
+          type: string
+          format: uuid
+        operation_id:
+          type: string
+          format: uuid
+        amount:
+          type: number
+          format: double
+          multipleOf: 0.01
+        currency:
+          type: string
+          pattern: '^[A-Z]{3}$'
+        timestamp:
+          type: string
+          format: date-time
+        type:
+          type: string
+          enum: [sale, fee, interest, refund, chargeback, adjustment, other]
+        jurisdiction:
+          type: string
+          pattern: '^[A-Z]{2}$'
+        source:
+          type: string
+          enum: [api, kafka, batch, manual]
+        idempotency_key:
+          type: string
+          format: uuid
+
+    RevenueEventResponse:
+      allOf:
+        - $ref: '#/components/schemas/RevenueEventRequest'
+        - type: object
+          properties:
+            status:
+              type: string
+              enum: [received, validated, processed, rejected, cancelled]
+            hash:
+              type: string
+              pattern: '^[a-f0-9]{64}$'
+            signature:
+              type: string
+            created_at:
+              type: string
+              format: date-time
+            updated_at:
+              type: string
+              format: date-time
+
+    RevenueEventList:
+      type: object
+      properties:
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/RevenueEventResponse'
+        pagination:
+          $ref: '#/components/schemas/Pagination'
+
+    CalculationRequest:
+      type: object
+      required: [matrix_version, period_start, period_end]
+      properties:
+        matrix_version:
+          type: string
+        period_start:
+          type: string
+          format: date-time
+        period_end:
+          type: string
+          format: date-time
+
+    CalculationResponse:
+      type: object
+      properties:
+        calculation_id:
+          type: string
+          format: uuid
+        matrix_version:
+          type: string
+        period_start:
+          type: string
+          format: date-time
+        period_end:
+          type: string
+          format: date-time
+        gross_revenue:
+          type: number
+          format: double
+          multipleOf: 0.01
+        net_revenue:
+          type: number
+          format: double
+          multipleOf: 0.01
+        distributable_value:
+          type: number
+          format: double
+          multipleOf: 0.01
+        status:
+          type: string
+          enum: [draft, pending_review, pending_approval, pending_business_approval, pending_financial_approval, pending_compliance_approval, approved, settlement_generated, completed, rejected, failed, cancelled]
+        calculation_hash:
+          type: string
+          pattern: '^[a-f0-9]{64}$'
+        created_at:
+          type: string
+          format: date-time
+        updated_at:
+          type: string
+          format: date-time
+
+    CalculationList:
+      type: object
+      properties:
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/CalculationResponse'
+        pagination:
+          $ref: '#/components/schemas/Pagination'
+
+    SettlementInstructionResponse:
+      type: object
+      properties:
+        instruction_id:
+          type: string
+          format: uuid
+        calculation_id:
+          type: string
+          format: uuid
+        participant_id:
+          type: string
+          format: uuid
+        amount:
+          type: number
+          format: double
+          multipleOf: 0.01
+        currency:
+          type: string
+          pattern: '^[A-Z]{3}$'
+        status:
+          type: string
+          enum: [created, pending, processing, completed, failed, cancelled]
+        idempotency_key:
+          type: string
+          format: uuid
+        settlement_hash:
+          type: string
+          pattern: '^[a-f0-9]{64}$'
+        created_at:
+          type: string
+          format: date-time
+
+    SettlementInstructionList:
+      type: object
+      properties:
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/SettlementInstructionResponse'
+        pagination:
+          $ref: '#/components/schemas/Pagination'
+
+    DistributionMatrixResponse:
+      type: object
+      properties:
+        matrix_id:
+          type: string
+          format: uuid
+        version:
+          type: string
+        name:
+          type: string
+        status:
+          type: string
+          enum: [draft, pending_approval, active, deprecated, archived]
+        effective_from:
+          type: string
+          format: date-time
+        participants:
+          type: array
+          items:
+            $ref: '#/components/schemas/MatrixParticipant'
+        matrix_hash:
+          type: string
+          pattern: '^[a-f0-9]{64}$'
+
+    DistributionMatrixList:
+      type: object
+      properties:
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/DistributionMatrixResponse'
+        pagination:
+          $ref: '#/components/schemas/Pagination'
+
+    MatrixParticipant:
+      type: object
+      properties:
+        participant_id:
+          type: string
+          format: uuid
+        percentage:
+          type: number
+          format: double
+          multipleOf: 0.0001
+        floor:
+          type: number
+          format: double
+          multipleOf: 0.01
+        cap:
+          type: number
+          format: double
+          multipleOf: 0.01
+        priority:
+          type: integer
+        eligible:
+          type: boolean
+
+    ReconciliationRequest:
+      type: object
+      required: [period_start, period_end]
+      properties:
+        period_start:
+          type: string
+          format: date-time
+        period_end:
+          type: string
+          format: date-time
+
+    ReconciliationResponse:
+      type: object
+      properties:
+        reconciliation_id:
+          type: string
+          format: uuid
+        period_start:
+          type: string
+          format: date-time
+        period_end:
+          type: string
+          format: date-time
+        events_total_amount:
+          type: number
+          format: double
+          multipleOf: 0.01
+        settlements_total_amount:
+          type: number
+          format: double
+          multipleOf: 0.01
+        discrepancy_total:
+          type: number
+          format: double
+          multipleOf: 0.01
+        status:
+          type: string
+          enum: [pending, completed, failed]
+        reconciliation_hash:
+          type: string
+          pattern: '^[a-f0-9]{64}$'
+        created_at:
+          type: string
+          format: date-time
+
+    ReconciliationList:
+      type: object
+      properties:
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/ReconciliationResponse'
+        pagination:
+          $ref: '#/components/schemas/Pagination'
+
+    DisputeRequest:
+      type: object
+      required: [reason, description]
+      properties:
+        reason:
+          type: string
+          enum: [calculation_error, wrong_matrix, unrecognized_event, missing_settlement, wrong_amount, other]
+        description:
+          type: string
+        priority:
+          type: string
+          enum: [low, medium, high, critical]
+          default: medium
+
+    DisputeResponse:
+      type: object
+      properties:
+        dispute_id:
+          type: string
+          format: uuid
+        participant_id:
+          type: string
+          format: uuid
+        reason:
+          type: string
+          enum: [calculation_error, wrong_matrix, unrecognized_event, missing_settlement, wrong_amount, other]
+        description:
+          type: string
+        status:
+          type: string
+          enum: [open, investigation, resolved, rejected, cancelled]
+        priority:
+          type: string
+          enum: [low, medium, high, critical]
+        resolution:
+          type: string
+        resolved_at:
+          type: string
+          format: date-time
+        dispute_hash:
+          type: string
+          pattern: '^[a-f0-9]{64}$'
+        created_at:
+          type: string
+          format: date-time
+
+    DisputeList:
+      type: object
+      properties:
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/DisputeResponse'
+        pagination:
+          $ref: '#/components/schemas/Pagination'
+
+    ParticipantResponse:
+      type: object
+      properties:
+        participant_id:
+          type: string
+          format: uuid
+        name:
+          type: string
+        type:
+          type: string
+          enum: [founder, investor, operation, employee, other]
+        status:
+          type: string
+          enum: [active, inactive, pending, blocked]
+        escrow_account_id:
+          type: string
+          format: uuid
+        created_at:
+          type: string
+          format: date-time
+
+    ParticipantList:
+      type: object
+      properties:
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/ParticipantResponse'
+        pagination:
+          $ref: '#/components/schemas/Pagination'
+
+    Pagination:
+      type: object
+      properties:
+        page:
+          type: integer
+        limit:
+          type: integer
+        total:
+          type: integer
+        total_pages:
+          type: integer
+
+    HealthResponse:
+      type: object
+      properties:
+        status:
+          type: string
+          enum: [healthy, degraded, unhealthy]
+        timestamp:
+          type: string
+          format: date-time
+        version:
+          type: string
+
+    Error:
+      type: object
+      required: [code, message]
+      properties:
+        code:
+          type: string
+        message:
+          type: string
+        trace_id:
+          type: string
+
+  responses:
+    BadRequest:
+      description: Requisicao invalida
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    Unauthorized:
+      description: Nao autorizado
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    Forbidden:
+      description: Proibido
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    NotFound:
+      description: Recurso nao encontrado
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    InternalError:
+      description: Erro interno
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'

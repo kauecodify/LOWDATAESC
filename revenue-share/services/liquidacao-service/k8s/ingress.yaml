@@ -1,0 +1,143 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: liquidacao-service-ingress
+  namespace: revenue-share
+  labels:
+    app: liquidacao-service
+    service: revenue-share
+    tier: backend
+    version: v1.0.0
+    tr8-compliant: "true"
+    environment: production
+  annotations:
+    description: "Ingress for Revenue Share Liquidação Service"
+    maintainer: "Revenue Share Team"
+    
+    # AWS ALB annotations
+    kubernetes.io/ingress.class: "alb"
+    alb.ingress.kubernetes.io/scheme: "internal"
+    alb.ingress.kubernetes.io/target-type: "ip"
+    alb.ingress.kubernetes.io/load-balancer-type: "nlb"
+    alb.ingress.kubernetes.io/healthcheck-path: "/api/v1/health/liveness"
+    alb.ingress.kubernetes.io/healthcheck-port: "8443"
+    alb.ingress.kubernetes.io/healthcheck-protocol: "HTTPS"
+    alb.ingress.kubernetes.io/healthcheck-interval-seconds: "15"
+    alb.ingress.kubernetes.io/healthcheck-timeout-seconds: "5"
+    alb.ingress.kubernetes.io/healthy-threshold-count: "2"
+    alb.ingress.kubernetes.io/unhealthy-threshold-count: "3"
+    alb.ingress.kubernetes.io/listen-ports: '[{"HTTP": 80}, {"HTTPS":443}]'
+    alb.ingress.kubernetes.io/certificate-arn: "arn:aws:acm:sa-east-1:123456789012:certificate/xxxxxx-xxxx-xxxx-xxxx-xxxxxxxx"
+    alb.ingress.kubernetes.io/ssl-policy: "ELBSecurityPolicy-TLS13-1-2-2021-06"
+    
+    # SSL redirect
+    alb.ingress.kubernetes.io/ssl-redirect: "true"
+    
+    # Connection settings
+    alb.ingress.kubernetes.io/idle-timeout-seconds: "60"
+    alb.ingress.kubernetes.io/connection-idle-timeout-seconds: "60"
+    
+    # Access logging
+    alb.ingress.kubernetes.io/load-balancer-attributes: "access_logs.s3.enabled=true,access_logs.s3.bucket=revenue-share-alb-logs,access_logs.s3.prefix=liquidacao-service"
+    
+    # Security
+    alb.ingress.kubernetes.io/inbound-cidrs: "10.0.0.0/8,172.16.0.0/12,192.168.0.0/16"
+    alb.ingress.kubernetes.io/wafv2-acl-arn: "arn:aws:wafv2:sa-east-1:123456789012:regional/webacl/revenue-share-web-acl/xxxxxx-xxxx-xxxx-xxxx-xxxxxxxx"
+    
+    # External DNS
+    external-dns.alpha.kubernetes.io/hostname: "liquidacao.revenue-share.internal"
+    
+    # Prometheus
+    prometheus.io/scrape: "true"
+    prometheus.io/port: "8443"
+    prometheus.io/path: "/api/v1/health"
+
+spec:
+  tls:
+    - hosts:
+        - liquidacao.revenue-share.internal
+        - liquidacao-service.revenue-share.svc.cluster.local
+      secretName: liquidacao-service-tls
+  
+  rules:
+    - host: liquidacao.revenue-share.internal
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: liquidacao-service
+                port:
+                  name: https
+    
+    - host: liquidacao-service.revenue-share.svc.cluster.local
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: liquidacao-service
+                port:
+                  name: https
+
+---
+# Ingress for gRPC (separate if needed)
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: liquidacao-service-grpc-ingress
+  namespace: revenue-share
+  labels:
+    app: liquidacao-service
+    service: revenue-share
+    tier: backend
+    version: v1.0.0
+    tr8-compliant: "true"
+    environment: production
+  annotations:
+    description: "gRPC Ingress for Revenue Share Liquidação Service"
+    maintainer: "Revenue Share Team"
+    
+    # gRPC-specific annotations
+    kubernetes.io/ingress.class: "alb"
+    alb.ingress.kubernetes.io/scheme: "internal"
+    alb.ingress.kubernetes.io/target-type: "ip"
+    alb.ingress.kubernetes.io/protocol: "HTTPS"
+    alb.ingress.kubernetes.io/backend-protocol: "HTTPS"
+    alb.ingress.kubernetes.io/backend-protocol-version: "GRPC"
+    
+    # Health check for gRPC
+    alb.ingress.kubernetes.io/healthcheck-path: "/api/v1/health/liveness"
+    alb.ingress.kubernetes.io/healthcheck-port: "8443"
+    alb.ingress.kubernetes.io/healthcheck-protocol: "HTTPS"
+    
+    # gRPC health check
+    alb.ingress.kubernetes.io/healthcheck-path: "/grpc.health.v1.Health/Check"
+    alb.ingress.kubernetes.io/healthcheck-port: "50052"
+    
+    # SSL
+    alb.ingress.kubernetes.io/certificate-arn: "arn:aws:acm:sa-east-1:123456789012:certificate/xxxxxx-xxxx-xxxx-xxxx-xxxxxxxx"
+    alb.ingress.kubernetes.io/ssl-policy: "ELBSecurityPolicy-TLS13-1-2-2021-06"
+    
+    # External DNS
+    external-dns.alpha.kubernetes.io/hostname: "grpc.liquidacao.revenue-share.internal"
+
+spec:
+  tls:
+    - hosts:
+        - grpc.liquidacao.revenue-share.internal
+      secretName: liquidacao-service-grpc-tls
+  
+  rules:
+    - host: grpc.liquidacao.revenue-share.internal
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: liquidacao-service
+                port:
+                  name: grpc

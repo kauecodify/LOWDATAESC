@@ -1,0 +1,566 @@
+syntax = "proto3";
+
+package lowdataesc.v1;
+
+option go_package = "./proto/gen/go;lowdataesc/v1";
+
+// LOWDATAESC gRPC Service Definition
+// This service provides escrow and settlement operations for the Revenue Share module
+
+// Escrow Service - Manages escrow accounts and funds
+service EscrowService {
+  // Create a new escrow account
+  rpc CreateEscrowAccount(CreateEscrowAccountRequest) returns (CreateEscrowAccountResponse);
+
+  // Get escrow account details
+  rpc GetEscrowAccount(GetEscrowAccountRequest) returns (GetEscrowAccountResponse);
+
+  // List escrow accounts with pagination
+  rpc ListEscrowAccounts(ListEscrowAccountsRequest) returns (ListEscrowAccountsResponse);
+
+  // Deposit funds into an escrow account
+  rpc DepositFunds(DepositFundsRequest) returns (DepositFundsResponse);
+
+  // Withdraw funds from an escrow account
+  rpc WithdrawFunds(WithdrawFundsRequest) returns (WithdrawFundsResponse);
+
+  // Transfer funds between escrow accounts
+  rpc TransferFunds(TransferFundsRequest) returns (TransferFundsResponse);
+
+  // Get escrow account balance
+  rpc GetBalance(GetBalanceRequest) returns (GetBalanceResponse);
+
+  // Get escrow account transaction history
+  rpc GetTransactionHistory(GetTransactionHistoryRequest) returns (GetTransactionHistoryResponse);
+
+  // Freeze escrow account
+  rpc FreezeAccount(FreezeAccountRequest) returns (FreezeAccountResponse);
+
+  // Unfreeze escrow account
+  rpc UnfreezeAccount(UnfreezeAccountRequest) returns (UnfreezeAccountResponse);
+
+  // Close escrow account
+  rpc CloseAccount(CloseAccountRequest) returns (CloseAccountResponse);
+}
+
+// Settlement Service - Manages settlement operations
+service SettlementService {
+  // Create a new settlement instruction
+  rpc CreateSettlementInstruction(CreateSettlementInstructionRequest) returns (CreateSettlementInstructionResponse);
+
+  // Get settlement instruction details
+  rpc GetSettlementInstruction(GetSettlementInstructionRequest) returns (GetSettlementInstructionResponse);
+
+  // List settlement instructions with pagination
+  rpc ListSettlementInstructions(ListSettlementInstructionsRequest) returns (ListSettlementInstructionsResponse);
+
+  // Execute a settlement instruction
+  rpc ExecuteSettlement(ExecuteSettlementRequest) returns (ExecuteSettlementResponse);
+
+  // Cancel a settlement instruction
+  rpc CancelSettlement(CancelSettlementRequest) returns (CancelSettlementResponse);
+
+  // Get settlement status
+  rpc GetSettlementStatus(GetSettlementStatusRequest) returns (GetSettlementStatusResponse);
+
+  // Reconcile settlement
+  rpc ReconcileSettlement(ReconcileSettlementRequest) returns (ReconcileSettlementResponse);
+
+  // Get settlement history
+  rpc GetSettlementHistory(GetSettlementHistoryRequest) returns (GetSettlementHistoryResponse);
+}
+
+// Callback Service - For async notifications
+service CallbackService {
+  // Register a callback URL for settlement notifications
+  rpc RegisterCallback(RegisterCallbackRequest) returns (RegisterCallbackResponse);
+
+  // Unregister a callback URL
+  rpc UnregisterCallback(UnregisterCallbackRequest) returns (UnregisterCallbackResponse);
+
+  // List registered callbacks
+  rpc ListCallbacks(ListCallbacksRequest) returns (ListCallbacksResponse);
+}
+
+// ============================================================================
+// MESSAGE DEFINITIONS
+// ============================================================================
+
+// Common types
+message Money {
+  string currency = 1;
+  string amount = 2;  // Decimal string to avoid floating point precision issues
+}
+
+message Timestamp {
+  int64 seconds = 1;
+  int32 nanos = 2;
+}
+
+message Pagination {
+  int32 page = 1;
+  int32 page_size = 2;
+  string order_by = 3;
+  bool ascending = 4;
+}
+
+message PaginationResponse {
+  int32 page = 1;
+  int32 page_size = 2;
+  int32 total_items = 3;
+  int32 total_pages = 4;
+}
+
+// ============================================================================
+// ESCROW SERVICE MESSAGES
+// ============================================================================
+
+message CreateEscrowAccountRequest {
+  string account_id = 1;
+  string owner_id = 2;  // Operation ID
+  string owner_type = 3;  // OPERATION, FOUNDER, PARTNER, etc.
+  string name = 4;
+  string description = 5;
+  string currency = 6;  // Base currency for the account
+  map<string, string> metadata = 7;
+  string idempotency_key = 8;
+}
+
+message CreateEscrowAccountResponse {
+  string account_id = 1;
+  string owner_id = 2;
+  string status = 3;  // ACTIVE, FROZEN, CLOSED
+  string currency = 4;
+  Money balance = 5;
+  Timestamp created_at = 6;
+  Timestamp updated_at = 7;
+  string idempotency_key = 8;
+}
+
+message GetEscrowAccountRequest {
+  string account_id = 1;
+}
+
+message GetEscrowAccountResponse {
+  string account_id = 1;
+  string owner_id = 2;
+  string owner_type = 3;
+  string name = 4;
+  string description = 5;
+  string status = 6;
+  string currency = 7;
+  Money balance = 8;
+  Money available_balance = 9;
+  Money reserved_balance = 10;
+  Timestamp created_at = 11;
+  Timestamp updated_at = 12;
+  map<string, string> metadata = 13;
+  bool is_frozen = 14;
+  bool is_closed = 15;
+}
+
+message ListEscrowAccountsRequest {
+  string owner_id = 1;
+  string status = 2;
+  string currency = 3;
+  Pagination pagination = 4;
+}
+
+message ListEscrowAccountsResponse {
+  repeated GetEscrowAccountResponse accounts = 1;
+  PaginationResponse pagination = 2;
+}
+
+message DepositFundsRequest {
+  string account_id = 1;
+  Money amount = 2;
+  string reference_id = 3;  // External reference
+  string description = 4;
+  map<string, string> metadata = 5;
+  string idempotency_key = 6;
+}
+
+message DepositFundsResponse {
+  string transaction_id = 1;
+  string account_id = 2;
+  Money amount = 3;
+  Money new_balance = 4;
+  string reference_id = 5;
+  string status = 6;  // PENDING, COMPLETED, FAILED
+  Timestamp created_at = 7;
+  string idempotency_key = 8;
+}
+
+message WithdrawFundsRequest {
+  string account_id = 1;
+  Money amount = 2;
+  string destination_account = 3;  // External account
+  string reference_id = 4;
+  string description = 5;
+  map<string, string> metadata = 6;
+  string idempotency_key = 7;
+}
+
+message WithdrawFundsResponse {
+  string transaction_id = 1;
+  string account_id = 2;
+  Money amount = 3;
+  Money new_balance = 4;
+  string destination_account = 5;
+  string reference_id = 6;
+  string status = 7;
+  Timestamp created_at = 8;
+  string idempotency_key = 9;
+}
+
+message TransferFundsRequest {
+  string source_account_id = 1;
+  string destination_account_id = 2;
+  Money amount = 3;
+  string reference_id = 4;
+  string description = 5;
+  map<string, string> metadata = 6;
+  string idempotency_key = 7;
+}
+
+message TransferFundsResponse {
+  string transaction_id = 1;
+  string source_account_id = 2;
+  string destination_account_id = 3;
+  Money amount = 4;
+  Money source_new_balance = 5;
+  Money destination_new_balance = 6;
+  string reference_id = 7;
+  string status = 8;
+  Timestamp created_at = 9;
+  string idempotency_key = 10;
+}
+
+message GetBalanceRequest {
+  string account_id = 1;
+  string currency = 2;  // Optional: specific currency
+}
+
+message GetBalanceResponse {
+  string account_id = 1;
+  string currency = 2;
+  Money balance = 3;
+  Money available_balance = 4;
+  Money reserved_balance = 5;
+  Timestamp as_of = 6;
+}
+
+message GetTransactionHistoryRequest {
+  string account_id = 1;
+  string transaction_type = 2;  // DEPOSIT, WITHDRAWAL, TRANSFER
+  string status = 3;
+  Timestamp start_date = 4;
+  Timestamp end_date = 5;
+  Pagination pagination = 6;
+}
+
+message GetTransactionHistoryResponse {
+  repeated Transaction transactions = 1;
+  PaginationResponse pagination = 2;
+}
+
+message Transaction {
+  string transaction_id = 1;
+  string account_id = 2;
+  string type = 3;  // DEPOSIT, WITHDRAWAL, TRANSFER
+  string direction = 4;  // IN, OUT
+  Money amount = 5;
+  Money balance_after = 6;
+  string reference_id = 7;
+  string description = 8;
+  string status = 9;
+  Timestamp created_at = 10;
+  map<string, string> metadata = 11;
+}
+
+message FreezeAccountRequest {
+  string account_id = 1;
+  string reason = 2;
+  string idempotency_key = 3;
+}
+
+message FreezeAccountResponse {
+  string account_id = 1;
+  bool is_frozen = 2;
+  string status = 3;
+  Timestamp frozen_at = 4;
+  string reason = 5;
+  string idempotency_key = 6;
+}
+
+message UnfreezeAccountRequest {
+  string account_id = 1;
+  string reason = 2;
+  string idempotency_key = 3;
+}
+
+message UnfreezeAccountResponse {
+  string account_id = 1;
+  bool is_frozen = 2;
+  string status = 3;
+  Timestamp unfrozen_at = 4;
+  string reason = 5;
+  string idempotency_key = 6;
+}
+
+message CloseAccountRequest {
+  string account_id = 1;
+  string reason = 2;
+  string idempotency_key = 3;
+}
+
+message CloseAccountResponse {
+  string account_id = 1;
+  bool is_closed = 2;
+  string status = 3;
+  Money final_balance = 4;
+  Timestamp closed_at = 5;
+  string reason = 6;
+  string idempotency_key = 7;
+}
+
+// ============================================================================
+// SETTLEMENT SERVICE MESSAGES
+// ============================================================================
+
+message CreateSettlementInstructionRequest {
+  string instruction_id = 1;
+  string source_account_id = 2;  // Escrow account
+  string destination_account_id = 3;  // External account
+  Money amount = 4;
+  string currency = 5;
+  string reference_id = 6;  // External reference
+  string description = 7;
+  string status = 8;  // PENDING, EXECUTED, FAILED, CANCELLED
+  Timestamp scheduled_date = 9;
+  Timestamp expiry_date = 10;
+  map<string, string> metadata = 11;
+  string idempotency_key = 12;
+  string callback_url = 13;
+}
+
+message CreateSettlementInstructionResponse {
+  string instruction_id = 1;
+  string source_account_id = 2;
+  string destination_account_id = 3;
+  Money amount = 4;
+  string currency = 5;
+  string reference_id = 6;
+  string status = 7;
+  Timestamp created_at = 8;
+  Timestamp scheduled_date = 9;
+  Timestamp expiry_date = 10;
+  string idempotency_key = 11;
+  string callback_url = 12;
+}
+
+message GetSettlementInstructionRequest {
+  string instruction_id = 1;
+}
+
+message GetSettlementInstructionResponse {
+  string instruction_id = 1;
+  string source_account_id = 2;
+  string destination_account_id = 3;
+  Money amount = 4;
+  string currency = 5;
+  string reference_id = 6;
+  string description = 7;
+  string status = 8;
+  Timestamp created_at = 9;
+  Timestamp scheduled_date = 10;
+  Timestamp expiry_date = 11;
+  Timestamp executed_at = 12;
+  Timestamp completed_at = 13;
+  string error_message = 14;
+  map<string, string> metadata = 15;
+  string callback_url = 16;
+  string transaction_id = 17;  // LOWDATAESC transaction ID
+}
+
+message ListSettlementInstructionsRequest {
+  string source_account_id = 1;
+  string destination_account_id = 2;
+  string status = 3;
+  Timestamp start_date = 4;
+  Timestamp end_date = 5;
+  Pagination pagination = 6;
+}
+
+message ListSettlementInstructionsResponse {
+  repeated GetSettlementInstructionResponse instructions = 1;
+  PaginationResponse pagination = 2;
+}
+
+message ExecuteSettlementRequest {
+  string instruction_id = 1;
+  string idempotency_key = 2;
+  bool force_execute = 3;  // Execute even if scheduled date hasn't arrived
+}
+
+message ExecuteSettlementResponse {
+  string instruction_id = 1;
+  string transaction_id = 2;
+  string status = 3;
+  Money amount = 4;
+  string currency = 5;
+  Timestamp executed_at = 6;
+  string error_message = 7;
+  string idempotency_key = 8;
+}
+
+message CancelSettlementRequest {
+  string instruction_id = 1;
+  string reason = 2;
+  string idempotency_key = 3;
+}
+
+message CancelSettlementResponse {
+  string instruction_id = 1;
+  string status = 2;
+  Timestamp cancelled_at = 3;
+  string reason = 4;
+  string idempotency_key = 5;
+}
+
+message GetSettlementStatusRequest {
+  string instruction_id = 1;
+}
+
+message GetSettlementStatusResponse {
+  string instruction_id = 1;
+  string status = 2;
+  string transaction_id = 3;
+  Money amount = 4;
+  string currency = 5;
+  Timestamp created_at = 6;
+  Timestamp executed_at = 7;
+  Timestamp completed_at = 8;
+  string error_message = 9;
+}
+
+message ReconcileSettlementRequest {
+  string instruction_id = 1;
+  string transaction_id = 2;
+  string idempotency_key = 3;
+}
+
+message ReconcileSettlementResponse {
+  string instruction_id = 1;
+  string transaction_id = 2;
+  bool is_reconciled = 3;
+  Money expected_amount = 4;
+  Money actual_amount = 5;
+  string status = 6;
+  Timestamp reconciled_at = 7;
+  string discrepancy_reason = 8;
+  string idempotency_key = 9;
+}
+
+message GetSettlementHistoryRequest {
+  string account_id = 1;  // Either source or destination
+  string status = 2;
+  Timestamp start_date = 3;
+  Timestamp end_date = 4;
+  Pagination pagination = 5;
+}
+
+message GetSettlementHistoryResponse {
+  repeated SettlementHistoryItem history = 1;
+  PaginationResponse pagination = 2;
+}
+
+message SettlementHistoryItem {
+  string instruction_id = 1;
+  string transaction_id = 2;
+  string source_account_id = 3;
+  string destination_account_id = 4;
+  Money amount = 5;
+  string currency = 6;
+  string status = 7;
+  Timestamp created_at = 8;
+  Timestamp executed_at = 9;
+  Timestamp completed_at = 10;
+  string reference_id = 11;
+  string description = 12;
+}
+
+// ============================================================================
+// CALLBACK SERVICE MESSAGES
+// ============================================================================
+
+message RegisterCallbackRequest {
+  string callback_url = 1;
+  repeated string event_types = 2;  // SETTLEMENT_EXECUTED, SETTLEMENT_FAILED, SETTLEMENT_COMPLETED
+  string secret_token = 3;  // For signature verification
+  string idempotency_key = 4;
+}
+
+message RegisterCallbackResponse {
+  string callback_id = 1;
+  string callback_url = 2;
+  repeated string event_types = 3;
+  Timestamp created_at = 4;
+  string idempotency_key = 5;
+}
+
+message UnregisterCallbackRequest {
+  string callback_id = 1;
+  string idempotency_key = 2;
+}
+
+message UnregisterCallbackResponse {
+  string callback_id = 1;
+  bool is_unregistered = 2;
+  Timestamp unregistered_at = 3;
+  string idempotency_key = 4;
+}
+
+message ListCallbacksRequest {
+  Pagination pagination = 1;
+}
+
+message ListCallbacksResponse {
+  repeated Callback callbacks = 1;
+  PaginationResponse pagination = 2;
+}
+
+message Callback {
+  string callback_id = 1;
+  string callback_url = 2;
+  repeated string event_types = 3;
+  string secret_token = 4;
+  bool is_active = 5;
+  Timestamp created_at = 6;
+  Timestamp updated_at = 7;
+}
+
+// ============================================================================
+// CALLBACK NOTIFICATION MESSAGES
+// ============================================================================
+
+message SettlementEvent {
+  string event_id = 1;
+  string event_type = 2;  // SETTLEMENT_EXECUTED, SETTLEMENT_FAILED, SETTLEMENT_COMPLETED
+  string instruction_id = 3;
+  string transaction_id = 4;
+  Money amount = 5;
+  string currency = 6;
+  string status = 7;
+  Timestamp event_timestamp = 8;
+  string error_message = 9;
+  map<string, string> metadata = 10;
+}
+
+// Webhook payload for callbacks
+message WebhookPayload {
+  string callback_id = 1;
+  SettlementEvent event = 2;
+  string signature = 3;  // HMAC signature for verification
+  Timestamp sent_at = 4;
+}

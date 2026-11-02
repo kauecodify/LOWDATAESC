@@ -1,0 +1,130 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: ingest-service-ingress
+  namespace: revenue-share
+  labels:
+    app: ingest-service
+    service: revenue-share
+    tier: backend
+    version: v1.0.0
+    tr8-compliant: "true"
+  annotations:
+    description: "Ingress for Revenue Share Ingest Service"
+    
+    # AWS ALB Ingress Controller
+    kubernetes.io/ingress.class: "alb"
+    alb.ingress.kubernetes.io/scheme: "internet-facing"
+    alb.ingress.kubernetes.io/target-type: "ip"
+    alb.ingress.kubernetes.io/listen-ports: '[{"HTTP": 80}, {"HTTPS":443}]'
+    alb.ingress.kubernetes.io/certificate-arn: "arn:aws:acm:sa-east-1:ACCOUNT_ID:certificate/CERTIFICATE_ID"
+    alb.ingress.kubernetes.io/ssl-policy: "ELBSecurityPolicy-TLS13-1-2-2021-06"
+    
+    # SSL Redirect
+    alb.ingress.kubernetes.io/ssl-redirect: "true"
+    
+    # Health Check
+    alb.ingress.kubernetes.io/healthcheck-path: "/api/v1/health/liveness"
+    alb.ingress.kubernetes.io/healthcheck-port: "8443"
+    alb.ingress.kubernetes.io/healthcheck-interval-seconds: "15"
+    alb.ingress.kubernetes.io/healthcheck-timeout-seconds: "5"
+    alb.ingress.kubernetes.io/healthy-threshold-count: "2"
+    alb.ingress.kubernetes.io/unhealthy-threshold-count: "3"
+    
+    # Connection Settings
+    alb.ingress.kubernetes.io/load-balancer-attributes: "routing.http2.enabled=true,routing.http.desync_mitigation_mode=defensive,load_balancing.cross_zone.enabled=true"
+    alb.ingress.kubernetes.io/idle-timeout-seconds: "60"
+    alb.ingress.kubernetes.io/connection-idle-timeout: "60"
+    
+    # WAF Integration
+    alb.ingress.kubernetes.io/wafv2-acl-arn: "arn:aws:wafv2:sa-east-1:ACCOUNT_ID:regional/webacl/RevenueShareWAF/ID"
+    
+    # Access Logs
+    alb.ingress.kubernetes.io/load-balancer-access-log-enabled: "true"
+    alb.ingress.kubernetes.io/load-balancer-access-log-s3-bucket-name: "revenue-share-access-logs"
+    alb.ingress.kubernetes.io/load-balancer-access-log-s3-bucket-prefix: "ingest-service"
+    
+    # IP Restrictions (allow internal and specific IPs)
+    alb.ingress.kubernetes.io/inbound-cidrs: "10.0.0.0/8,172.16.0.0/12,192.168.0.0/16,185.0.0.0/8"
+    
+    # Rate Limiting
+    alb.ingress.kubernetes.io/threat-intel-mode: "block-all"
+    
+    # External DNS
+    external-dns.alpha.kubernetes.io/hostname: "ingest.revenue-share.company.com"
+    external-dns.alpha.kubernetes.io/alias: "true"
+    
+spec:
+  tls:
+    - hosts:
+        - "ingest.revenue-share.company.com"
+        - "*.revenue-share.company.com"
+      secretName: ingest-service-tls-secret
+  
+  rules:
+    - host: "ingest.revenue-share.company.com"
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: ingest-service-external
+                port:
+                  number: 443
+
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: ingest-service-internal-ingress
+  namespace: revenue-share
+  labels:
+    app: ingest-service
+    service: revenue-share
+    tier: backend
+    version: v1.0.0
+    tr8-compliant: "true"
+    internal: "true"
+  annotations:
+    description: "Internal Ingress for Revenue Share Ingest Service"
+    
+    # Internal ALB
+    kubernetes.io/ingress.class: "alb"
+    alb.ingress.kubernetes.io/scheme: "internal"
+    alb.ingress.kubernetes.io/target-type: "ip"
+    alb.ingress.kubernetes.io/listen-ports: '[{"HTTP": 80}, {"HTTPS":443}]'
+    alb.ingress.kubernetes.io/certificate-arn: "arn:aws:acm:sa-east-1:ACCOUNT_ID:certificate/INTERNAL_CERTIFICATE_ID"
+    alb.ingress.kubernetes.io/ssl-policy: "ELBSecurityPolicy-TLS13-1-2-2021-06"
+    
+    # SSL Redirect
+    alb.ingress.kubernetes.io/ssl-redirect: "true"
+    
+    # Health Check
+    alb.ingress.kubernetes.io/healthcheck-path: "/api/v1/health/liveness"
+    alb.ingress.kubernetes.io/healthcheck-port: "8443"
+    
+    # Connection Settings
+    alb.ingress.kubernetes.io/load-balancer-attributes: "routing.http2.enabled=true,load_balancing.cross_zone.enabled=true"
+    
+    # Internal DNS
+    external-dns.alpha.kubernetes.io/hostname: "ingest.internal.revenue-share.company.com"
+    external-dns.alpha.kubernetes.io/alias: "true"
+    
+spec:
+  tls:
+    - hosts:
+        - "ingest.internal.revenue-share.company.com"
+      secretName: ingest-service-internal-tls-secret
+  
+  rules:
+    - host: "ingest.internal.revenue-share.company.com"
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: ingest-service
+                port:
+                  number: 8443

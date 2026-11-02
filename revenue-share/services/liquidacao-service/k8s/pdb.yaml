@@ -1,0 +1,52 @@
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: liquidacao-service-pdb
+  namespace: revenue-share
+  labels:
+    app: liquidacao-service
+    service: revenue-share
+    tier: backend
+    version: v1.0.0
+    tr8-compliant: "true"
+    environment: production
+  annotations:
+    description: "Pod Disruption Budget for Revenue Share Liquidação Service"
+    maintainer: "Revenue Share Team"
+
+spec:
+  # Minimum available pods during voluntary disruptions
+  minAvailable: 2
+  
+  # Maximum unavailable pods during voluntary disruptions
+  # maxUnavailable: 1
+  
+  selector:
+    matchLabels:
+      app: liquidacao-service
+
+---
+# Additional PDB for zone-level protection
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: liquidacao-service-zone-pdb
+  namespace: revenue-share
+  labels:
+    app: liquidacao-service
+    service: revenue-share
+    tier: backend
+    version: v1.0.0
+    tr8-compliant: "true"
+    environment: production
+  annotations:
+    description: "Zone-level Pod Disruption Budget for Revenue Share Liquidação Service"
+    maintainer: "Revenue Share Team"
+
+spec:
+  minAvailable: 1
+  
+  selector:
+    matchLabels:
+      app: liquidacao-service
+      topology.kubernetes.io/zone: "*"

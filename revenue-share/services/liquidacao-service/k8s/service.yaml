@@ -1,0 +1,97 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: liquidacao-service
+  namespace: revenue-share
+  labels:
+    app: liquidacao-service
+    service: revenue-share
+    tier: backend
+    version: v1.0.0
+    tr8-compliant: "true"
+    environment: production
+  annotations:
+    description: "Revenue Share Liquidação Service - ClusterIP and LoadBalancer"
+    maintainer: "Revenue Share Team"
+    service.beta.kubernetes.io/aws-load-balancer-type: "nlb"
+    service.beta.kubernetes.io/aws-load-balancer-internal: "true"
+    service.beta.kubernetes.io/aws-load-balancer-cross-zone-load-balancing-enabled: "true"
+    service.beta.kubernetes.io/aws-load-balancer-connection-idle-timeout: "60"
+    external-dns.alpha.kubernetes.io/hostname: "liquidacao-service.revenue-share.internal"
+    prometheus.io/scrape: "true"
+    prometheus.io/port: "8443"
+    prometheus.io/path: "/api/v1/health"
+
+spec:
+  type: LoadBalancer
+  selector:
+    app: liquidacao-service
+  
+  ports:
+    - name: https
+      port: 443
+      targetPort: 8443
+      protocol: TCP
+      appProtocol: https
+    - name: http-metrics
+      port: 8080
+      targetPort: 8080
+      protocol: TCP
+      appProtocol: http
+    - name: grpc
+      port: 50052
+      targetPort: 50052
+      protocol: TCP
+      appProtocol: grpc
+  
+  sessionAffinity: None
+  sessionAffinityConfig:
+    clientIP:
+      timeoutSeconds: 10800
+  
+  loadBalancerClass: service.k8s.aws/nlb
+  
+  # For internal-only access
+  internalTrafficPolicy: Cluster
+  
+  # Annotations for AWS NLB
+  # externalTrafficPolicy: Local
+  # loadBalancerSourceRanges:
+  #   - 10.0.0.0/8
+  #   - 172.16.0.0/12
+  #   - 192.168.0.0/16
+
+---
+# Headless service for direct pod access
+apiVersion: v1
+kind: Service
+metadata:
+  name: liquidacao-service-headless
+  namespace: revenue-share
+  labels:
+    app: liquidacao-service
+    service: revenue-share
+    tier: backend
+    version: v1.0.0
+    tr8-compliant: "true"
+    environment: production
+  annotations:
+    description: "Revenue Share Liquidação Service - Headless for direct pod access"
+    prometheus.io/scrape: "true"
+    prometheus.io/port: "8443"
+
+spec:
+  type: ClusterIP
+  clusterIP: None
+  selector:
+    app: liquidacao-service
+  
+  ports:
+    - name: http
+      port: 8443
+      targetPort: 8443
+      protocol: TCP
+    - name: grpc
+      port: 50052
+      targetPort: 50052
+      protocol: TCP

@@ -1,0 +1,34 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: liquidacao-service
+  namespace: revenue-share
+
+spec:
+  replicas: 5
+  
+  template:
+    spec:
+      containers:
+        - name: liquidacao-service
+          resources:
+            requests:
+              cpu: "200m"
+              memory: "384Mi"
+            limits:
+              cpu: "2000m"
+              memory: "1024Mi"
+          
+          env:
+            - name: NODE_ENV
+              value: "production"
+            - name: LOG_LEVEL
+              value: "info"
+            - name: DB_SSL
+              value: "true"
+            - name: KAFKA_SSL
+              value: "true"
+            - name: LOWDATAESC_SSL
+              value: "true"
+            - name: MTLS_ENABLED
+              value: "true"

@@ -1,0 +1,98 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: ingest-service
+  namespace: revenue-share
+  labels:
+    app: ingest-service
+    service: revenue-share
+    tier: backend
+    version: v1.0.0
+    tr8-compliant: "true"
+  annotations:
+    description: "Revenue Share Ingest Service - TR8 Standard"
+    service.beta.kubernetes.io/aws-load-balancer-type: "nlb"
+    service.beta.kubernetes.io/aws-load-balancer-internal: "true"
+    service.beta.kubernetes.io/aws-load-balancer-cross-zone-load-balancing-enabled: "true"
+    service.beta.kubernetes.io/aws-load-balancer-connection-idle-timeout: "60"
+    
+spec:
+  type: ClusterIP
+  selector:
+    app: ingest-service
+  
+  ports:
+    - name: http
+      port: 8443
+      targetPort: 8443
+      protocol: TCP
+    - name: metrics
+      port: 8080
+      targetPort: 8080
+      protocol: TCP
+  
+  sessionAffinity: None
+  sessionAffinityConfig:
+    clientIP:
+      timeoutSeconds: 10800
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: ingest-service-external
+  namespace: revenue-share
+  labels:
+    app: ingest-service
+    service: revenue-share
+    tier: backend
+    version: v1.0.0
+    tr8-compliant: "true"
+    external: "true"
+  annotations:
+    description: "Revenue Share Ingest Service - External Access"
+    service.beta.kubernetes.io/aws-load-balancer-type: "nlb"
+    service.beta.kubernetes.io/aws-load-balancer-scheme: "internet-facing"
+    service.beta.kubernetes.io/aws-load-balancer-cross-zone-load-balancing-enabled: "true"
+    service.beta.kubernetes.io/aws-load-balancer-connection-idle-timeout: "60"
+    external-dns.alpha.kubernetes.io/hostname: "ingest.revenue-share.company.com"
+    
+spec:
+  type: LoadBalancer
+  selector:
+    app: ingest-service
+  
+  ports:
+    - name: https
+      port: 443
+      targetPort: 8443
+      protocol: TCP
+  
+  sessionAffinity: None
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: ingest-service-headless
+  namespace: revenue-share
+  labels:
+    app: ingest-service
+    service: revenue-share
+    tier: backend
+    version: v1.0.0
+    tr8-compliant: "true"
+    headless: "true"
+  annotations:
+    description: "Revenue Share Ingest Service - Headless for internal DNS"
+    
+spec:
+  clusterIP: None
+  selector:
+    app: ingest-service
+  
+  ports:
+    - name: http
+      port: 8443
+      targetPort: 8443
+      protocol: TCP

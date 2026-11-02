@@ -1,0 +1,266 @@
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: ingest-service-allow-kafka
+  namespace: revenue-share
+  labels:
+    app: ingest-service
+    service: revenue-share
+    tier: backend
+    version: v1.0.0
+    tr8-compliant: "true"
+  annotations:
+    description: "Allow Ingest Service to communicate with Kafka"
+    
+spec:
+  podSelector:
+    matchLabels:
+      app: ingest-service
+  
+  policyTypes:
+    - Egress
+  
+  egress:
+    - to:
+        - namespaceSelector:
+            matchLabels:
+              name: kafka
+          podSelector:
+            matchLabels:
+              app: kafka
+      ports:
+        - protocol: TCP
+          port: 9092
+        - protocol: TCP
+          port: 9093
+
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: ingest-service-allow-postgres
+  namespace: revenue-share
+  labels:
+    app: ingest-service
+    service: revenue-share
+    tier: backend
+    version: v1.0.0
+    tr8-compliant: "true"
+  annotations:
+    description: "Allow Ingest Service to communicate with PostgreSQL"
+    
+spec:
+  podSelector:
+    matchLabels:
+      app: ingest-service
+  
+  policyTypes:
+    - Egress
+  
+  egress:
+    - to:
+        - namespaceSelector:
+            matchLabels:
+              name: database
+          podSelector:
+            matchLabels:
+              app: postgres
+      ports:
+        - protocol: TCP
+          port: 5432
+
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: ingest-service-allow-redis
+  namespace: revenue-share
+  labels:
+    app: ingest-service
+    service: revenue-share
+    tier: backend
+    version: v1.0.0
+    tr8-compliant: "true"
+  annotations:
+    description: "Allow Ingest Service to communicate with Redis"
+    
+spec:
+  podSelector:
+    matchLabels:
+      app: ingest-service
+  
+  policyTypes:
+    - Egress
+  
+  egress:
+    - to:
+        - namespaceSelector:
+            matchLabels:
+              name: cache
+          podSelector:
+            matchLabels:
+              app: redis
+      ports:
+        - protocol: TCP
+          port: 6379
+
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: ingest-service-allow-vault
+  namespace: revenue-share
+  labels:
+    app: ingest-service
+    service: revenue-share
+    tier: backend
+    version: v1.0.0
+    tr8-compliant: "true"
+  annotations:
+    description: "Allow Ingest Service to communicate with Vault"
+    
+spec:
+  podSelector:
+    matchLabels:
+      app: ingest-service
+  
+  policyTypes:
+    - Egress
+  
+  egress:
+    - to:
+        - namespaceSelector:
+            matchLabels:
+              name: security
+          podSelector:
+            matchLabels:
+              app: vault
+      ports:
+        - protocol: TCP
+          port: 8200
+        - protocol: TCP
+          port: 8201
+
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: ingest-service-allow-internal
+  namespace: revenue-share
+  labels:
+    app: ingest-service
+    service: revenue-share
+    tier: backend
+    version: v1.0.0
+    tr8-compliant: "true"
+  annotations:
+    description: "Allow Ingest Service to communicate with other Revenue Share services"
+    
+spec:
+  podSelector:
+    matchLabels:
+      app: ingest-service
+  
+  policyTypes:
+    - Egress
+    - Ingress
+  
+  egress:
+    - to:
+        - namespaceSelector:
+            matchLabels:
+              name: revenue-share
+          podSelector:
+            matchLabels:
+              service: revenue-share
+      ports:
+        - protocol: TCP
+          port: 8443
+        - protocol: TCP
+          port: 8080
+  
+  ingress:
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              name: revenue-share
+          podSelector:
+            matchLabels:
+              service: revenue-share
+      ports:
+        - protocol: TCP
+          port: 8443
+
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: ingest-service-allow-monitoring
+  namespace: revenue-share
+  labels:
+    app: ingest-service
+    service: revenue-share
+    tier: backend
+    version: v1.0.0
+    tr8-compliant: "true"
+  annotations:
+    description: "Allow monitoring tools to scrape Ingest Service metrics"
+    
+spec:
+  podSelector:
+    matchLabels:
+      app: ingest-service
+  
+  policyTypes:
+    - Ingress
+  
+  ingress:
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              name: monitoring
+          podSelector:
+            matchLabels:
+              app: prometheus
+      ports:
+        - protocol: TCP
+          port: 8080
+    
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              name: monitoring
+          podSelector:
+            matchLabels:
+              app: grafana
+      ports:
+        - protocol: TCP
+          port: 8080
+
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: ingest-service-deny-all-other
+  namespace: revenue-share
+  labels:
+    app: ingest-service
+    service: revenue-share
+    tier: backend
+    version: v1.0.0
+    tr8-compliant: "true"
+  annotations:
+    description: "Deny all other traffic to Ingest Service (Zero Trust)"
+    
+spec:
+  podSelector:
+    matchLabels:
+      app: ingest-service
+  
+  policyTypes:
+    - Ingress
+    - Egress
+  
+  # Empty ingress and egress means deny all
+  ingress: []
+  egress: []

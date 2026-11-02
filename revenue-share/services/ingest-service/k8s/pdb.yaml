@@ -1,0 +1,42 @@
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: ingest-service-pdb
+  namespace: revenue-share
+  labels:
+    app: ingest-service
+    service: revenue-share
+    tier: backend
+    version: v1.0.0
+    tr8-compliant: "true"
+  annotations:
+    description: "Pod Disruption Budget for Revenue Share Ingest Service"
+    
+spec:
+  minAvailable: 2
+  maxUnavailable: 1
+  selector:
+    matchLabels:
+      app: ingest-service
+
+---
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: ingest-service-pdb-high-availability
+  namespace: revenue-share
+  labels:
+    app: ingest-service
+    service: revenue-share
+    tier: backend
+    version: v1.0.0
+    tr8-compliant: "true"
+    high-availability: "true"
+  annotations:
+    description: "High Availability Pod Disruption Budget for Revenue Share Ingest Service"
+    
+spec:
+  minAvailable: 75%
+  selector:
+    matchLabels:
+      app: ingest-service
