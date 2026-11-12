@@ -1,0 +1,401 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="LOWDATAESC v2 — Infraestrutura de Custódia Neutra, Split Fiscal Auditável e Yield sobre Ativos Ociosos.">
+    <title>LOWDATAESC v2 | Infraestrutura de Confiança</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+    <style>
+        :root {
+            --bg-primary: #F8FAFC;
+            --bg-secondary: #FFFFFF;
+            --bg-card: #FFFFFF;
+            --text-primary: #0F172A;
+            --text-secondary: #475569;
+            --text-muted: #94A3B8;
+            --border-color: #E2E8F0;
+            --accent-emerald: #10B981;
+            --accent-emerald-soft: #D1FAE5;
+            --accent-navy: #1E293B;
+            --font-body: 'Inter', system-ui, sans-serif;
+            --font-mono: 'JetBrains Mono', monospace;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: var(--font-body);
+            background-color: var(--bg-primary);
+            color: var(--text-primary);
+            line-height: 1.6;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        h1, h2, h3, h4 { font-weight: 600; letter-spacing: -0.025em; color: var(--text-primary); }
+        .mono { font-family: var(--font-mono); }
+        .text-emerald { color: var(--accent-emerald); }
+        .text-muted { color: var(--text-muted); }
+
+        .container { max-width: 1200px; margin: 0 auto; padding: 0 1.5rem; }
+        section { padding: 5rem 0; }
+
+        .navbar {
+            position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+            background: rgba(255, 255, 255, 0.9); backdrop-filter: blur(12px);
+            border-bottom: 1px solid var(--border-color);
+        }
+        .nav-container {
+            max-width: 1200px; margin: 0 auto; padding: 1rem 1.5rem;
+            display: flex; justify-content: space-between; align-items: center;
+        }
+        .logo { font-weight: 700; font-size: 1.1rem; color: var(--text-primary); display: flex; align-items: center; gap: 0.5rem; }
+        .logo-badge { 
+            background: var(--accent-navy); color: white; font-size: 0.65rem; 
+            padding: 2px 6px; border-radius: 4px; font-family: var(--font-mono); 
+        }
+        .nav-links { display: flex; gap: 2rem; list-style: none; }
+        .nav-links a { 
+            text-decoration: none; color: var(--text-secondary); font-size: 0.9rem; font-weight: 500; 
+            transition: color 0.2s;
+        }
+        .nav-links a:hover { color: var(--text-primary); }
+        .btn-primary {
+            background: var(--accent-navy); color: white; padding: 0.6rem 1.2rem;
+            border-radius: 6px; text-decoration: none; font-size: 0.9rem; font-weight: 500;
+            transition: background 0.2s;
+        }
+        .btn-primary:hover { background: #0F172A; }
+
+        .hero { padding-top: 10rem; padding-bottom: 5rem; text-align: center; }
+        .hero-badge {
+            display: inline-flex; align-items: center; gap: 0.5rem;
+            background: var(--accent-emerald-soft); color: #065F46;
+            padding: 0.4rem 1rem; border-radius: 9999px; font-size: 0.8rem; font-weight: 600;
+            margin-bottom: 1.5rem;
+        }
+        .hero-badge .dot { width: 8px; height: 8px; background: var(--accent-emerald); border-radius: 50%; }
+        .hero h1 { font-size: clamp(2.5rem, 5vw, 3.5rem); line-height: 1.1; margin-bottom: 1.5rem; }
+        .hero p { font-size: 1.1rem; color: var(--text-secondary); max-width: 700px; margin: 0 auto 2rem; }
+        .hero-actions { display: flex; gap: 1rem; justify-content: center; }
+        .btn-secondary {
+            background: white; color: var(--text-primary); border: 1px solid var(--border-color);
+            padding: 0.6rem 1.2rem; border-radius: 6px; text-decoration: none; font-size: 0.9rem; font-weight: 500;
+        }
+
+        .stats-grid {
+            display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 1.5rem; margin-top: 4rem; padding: 2rem; background: white;
+            border: 1px solid var(--border-color); border-radius: 12px;
+        }
+        .stat-item { text-align: center; }
+        .stat-value { font-family: var(--font-mono); font-size: 1.5rem; font-weight: 600; color: var(--text-primary); }
+        .stat-label { font-size: 0.8rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.05em; margin-top: 0.25rem; }
+
+        .dashboard-section { background: white; border-top: 1px solid var(--border-color); border-bottom: 1px solid var(--border-color); }
+        .dashboard-header { margin-bottom: 2rem; }
+        .dashboard-header h2 { font-size: 1.8rem; margin-bottom: 0.5rem; }
+        
+        .yield-counter-box {
+            background: var(--bg-primary); border: 1px solid var(--border-color); border-radius: 12px;
+            padding: 2rem; text-align: center; margin-bottom: 2rem;
+        }
+        .yield-counter-label { font-size: 0.85rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.05em; }
+        .yield-counter-value { 
+            font-family: var(--font-mono); font-size: 2.5rem; font-weight: 700; 
+            color: var(--accent-emerald); margin: 0.5rem 0; 
+        }
+
+        .table-wrapper { overflow-x: auto; border: 1px solid var(--border-color); border-radius: 12px; margin-bottom: 2rem; }
+        table { width: 100%; border-collapse: collapse; font-size: 0.9rem; }
+        th { 
+            text-align: left; padding: 1rem; background: var(--bg-primary); 
+            color: var(--text-secondary); font-weight: 600; border-bottom: 1px solid var(--border-color); 
+            font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.05em;
+        }
+        td { padding: 1rem; border-bottom: 1px solid var(--border-color); color: var(--text-primary); }
+        tr:last-child td { border-bottom: none; }
+        tr:hover td { background: var(--bg-primary); }
+        .status-badge {
+            display: inline-flex; align-items: center; gap: 0.4rem;
+            background: var(--accent-emerald-soft); color: #065F46;
+            padding: 0.25rem 0.75rem; border-radius: 9999px; font-size: 0.75rem; font-weight: 600;
+        }
+        .status-badge::before { content: ''; width: 6px; height: 6px; background: var(--accent-emerald); border-radius: 50%; }
+
+        .charts-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 2rem; }
+        .chart-card { background: var(--bg-primary); border: 1px solid var(--border-color); border-radius: 12px; padding: 1.5rem; }
+        .chart-card h4 { font-size: 1rem; margin-bottom: 1rem; color: var(--text-secondary); }
+
+        .engine-preview {
+            background: var(--accent-navy); color: white; border-radius: 12px; padding: 2rem; margin-top: 2rem;
+        }
+        .engine-preview h3 { color: white; margin-bottom: 1rem; display: flex; align-items: center; gap: 0.5rem; }
+        .code-block {
+            background: rgba(0,0,0,0.3); border-radius: 8px; padding: 1rem;
+            font-family: var(--font-mono); font-size: 0.8rem; color: #A5F3FC; overflow-x: auto;
+        }
+
+        footer { background: white; border-top: 1px solid var(--border-color); padding: 3rem 0; margin-top: 4rem; }
+        .footer-content { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem; }
+        .footer-text { font-size: 0.85rem; color: var(--text-muted); }
+
+        .watermark {
+            position: fixed;
+            bottom: 24px;
+            right: 24px;
+            font-family: var(--font-mono);
+            font-size: 0.7rem;
+            color: var(--text-primary);
+            opacity: 0.15;
+            pointer-events: none;
+            z-index: 9999;
+            letter-spacing: 0.05em;
+            text-transform: uppercase;
+        }
+
+        @media (max-width: 768px) {
+            .nav-links { display: none; }
+            .hero h1 { font-size: 2rem; }
+            .stats-grid { grid-template-columns: repeat(2, 1fr); }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="watermark">laboratory of k by rocknewventure</div>
+
+    <nav class="navbar">
+        <div class="nav-container">
+            <div class="logo">LOWDATAESC <span class="logo-badge">v2.0</span></div>
+            <ul class="nav-links">
+                <li><a href="#dashboard">Painel de Custódia</a></li>
+                <li><a href="#engines">Motores de Decisão</a></li>
+                <li><a href="#compliance">Compliance PQC</a></li>
+                <li><a href="#contact" class="btn-primary">Solicitar Sandbox</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <section class="hero">
+        <div class="container">
+            <div class="hero-badge"><span class="dot"></span> Sistema Operacional • Reforma Fiscal Ready</div>
+            <h1>Custódia Neutra, Split Auditável<br>e Yield sobre Ativos Ociosos.</h1>
+            <p>A infraestrutura de confiança que transforma a complexidade da Reforma Tributária e a governança de dados em ativos financeiros produtivos e juridicamente blindados.</p>
+            <div class="hero-actions">
+                <a href="#dashboard" class="btn-primary">Ver Demonstração ao Vivo</a>
+                <a href="#engines" class="btn-secondary">Explorar Motores de Decisão</a>
+            </div>
+
+            <div class="stats-grid">
+                <div class="stat-item">
+                    <div class="stat-value mono">100%</div>
+                    <div class="stat-label">Segregação de Ativos</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-value mono text-emerald">PQC</div>
+                    <div class="stat-label">Criptografia NIST</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-value mono">&lt; 50ms</div>
+                    <div class="stat-label">Latência de Validação</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-value mono">WORM</div>
+                    <div class="stat-label">Auditoria Imutável</div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="dashboard-section" id="dashboard">
+        <div class="container">
+            <div class="dashboard-header">
+                <h2>Painel de Custódia e Yield em Tempo Real</h2>
+                <p class="text-muted">Simulação de pool de transição fiscal com retroalimentação composta. Rendimentos recalculados pro-rata sobre o saldo acumulado.</p>
+            </div>
+
+            <div class="yield-counter-box">
+                <div class="yield-counter-label">Rendimento Total Acumulado no Pool (Composto)</div>
+                <div class="yield-counter-value" id="totalYieldCounter">R$ 0,00</div>
+                <div class="text-muted" style="font-size: 0.8rem;">Atualização contínua • Base: 100% do CDI (13,65% a.a.) • Juros sobre Juros Ativos</div>
+            </div>
+
+            <div class="table-wrapper">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Entidade / Subledger</th>
+                            <th>Tipo de Ativo</th>
+                            <th class="mono" style="text-align: right;">Patrimônio Base (R$)</th>
+                            <th class="mono" style="text-align: right;">Yield Acumulado (R$)</th>
+                            <th>Participação</th>
+                            <th>Status de Compliance</th>
+                        </tr>
+                    </thead>
+                    <tbody id="accountsTableBody"></tbody>
+                </table>
+            </div>
+
+            <div class="charts-grid">
+                <div class="chart-card">
+                    <h4>Yield Acumulado por Entidade (Retroalimentado)</h4>
+                    <canvas id="yieldBarChart"></canvas>
+                </div>
+                <div class="chart-card">
+                    <h4>Distribuição do Pool de Custódia (%)</h4>
+                    <canvas id="depositPieChart"></canvas>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section id="engines">
+        <div class="container">
+            <h2 style="margin-bottom: 1rem;">Motores de Decisão Automatizados</h2>
+            <p class="text-muted" style="margin-bottom: 2rem;">Cada operação é avaliada por regras de negócio imutáveis antes de qualquer execução.</p>
+            
+            <div class="engine-preview">
+                <h3>⚙️ Motor de Decisão 01: Auditoria de Invariantes Fiscais</h3>
+                <div class="code-block">
+if (Valor_CBS + Valor_IBS + Valor_Retido === Valor_Total_Transacao) {
+    if (ValidarAssinaturaPQC(Origem) === TRUE) {
+        ExecutarAlocacaoSubledger();
+        GerarHashImutavel("AUDIT_OK");
+        AtivarRetroalimentacaoYield();
+    } else {
+        BloquearTransacao("FALHA_ASSINATURA_PQC");
+    }
+} else {
+    BloquearTransacao("ANOMALIA_SPLIT_INVARIANTE");
+    NotificarPainelAuditorTCU();
+}
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <footer>
+        <div class="container footer-content">
+            <div class="footer-text">
+                <strong>LOWDATAESC v2.0</strong> • Infraestrutura de Confiança para o Setor Público e Financeiro.<br>
+                Compatível com LGPD, Reforma Tributária e Padrões de Criptografia Pós-Quântica (NIST).
+            </div>
+            <div class="footer-text mono">
+                Hash do Sistema: <span class="text-emerald">8f4a2b...9c1d</span>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        const fundAccounts = [
+            { name: "COMITÊ GESTOR DO IBS (Transição)", type: "Fundo Federativo", deposit: 20000000000, accumulatedYield: 45000000 },
+            { name: "PGE-SP (Dívida Ativa Securitizada)", type: "Crédito Tributário", deposit: 8500000000, accumulatedYield: 19000000 },
+            { name: "SERPRO (Data Clean Room)", type: "Ativo de Dados Anonimizado", deposit: 3200000000, accumulatedYield: 7200000 },
+            { name: "CONSÓRCIO ENERGIA NACIONAL", type: "Receita de Concessão", deposit: 5100000000, accumulatedYield: 11500000 }
+        ];
+
+        const totalDeposit = fundAccounts.reduce((s, a) => s + a.deposit, 0);
+        const CDI_ANUAL = 13.65, DIAS_UTEIS = 252;
+        const TAXA_DIARIA = (CDI_ANUAL / 100) / DIAS_UTEIS;
+        
+        let lastTimestamp = Date.now();
+
+        function renderFundTable() {
+            const tbody = document.getElementById('accountsTableBody');
+            tbody.innerHTML = '';
+            let currentTotalYield = 0;
+            
+            fundAccounts.forEach(acc => {
+                currentTotalYield += acc.accumulatedYield;
+                const participation = ((acc.deposit / totalDeposit) * 100).toFixed(2);
+                const row = tbody.insertRow();
+                row.innerHTML = `
+                    <td><strong>${acc.name}</strong><br><span class="text-muted" style="font-size:0.8rem">${acc.type}</span></td>
+                    <td>${acc.type}</td>
+                    <td class="mono" style="text-align: right;">R$ ${(acc.deposit / 1e9).toFixed(2)} Bi</td>
+                    <td class="mono text-emerald" style="text-align: right;">R$ ${(acc.accumulatedYield / 1e6).toFixed(4)} Mi</td>
+                    <td>${participation}%</td>
+                    <td><span class="status-badge">Validado PQC</span></td>
+                `;
+            });
+            
+            document.getElementById('totalYieldCounter').textContent = 
+                `R$ ${currentTotalYield.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+                
+            return currentTotalYield;
+        }
+
+        let barChart, pieChart;
+        function initCharts() {
+            const labels = fundAccounts.map(a => a.name.length > 25 ? a.name.substring(0, 22) + '...' : a.name);
+            
+            Chart.defaults.color = '#64748B';
+            Chart.defaults.font.family = "'Inter', sans-serif";
+
+            barChart = new Chart(document.getElementById('yieldBarChart'), {
+                type: 'bar',
+                data: { 
+                    labels, 
+                    datasets: [{
+                        label: 'Yield Acumulado (R$)', 
+                        data: fundAccounts.map(a => a.accumulatedYield), 
+                        backgroundColor: '#10B981', 
+                        borderRadius: 4 
+                    }] 
+                },
+                options: { 
+                    responsive: true, 
+                    plugins: { legend: { display: false } },
+                    scales: { y: { beginAtZero: true, grid: { color: '#F1F5F9' } }, x: { grid: { display: false } } }
+                }
+            });
+
+            pieChart = new Chart(document.getElementById('depositPieChart'), {
+                type: 'doughnut',
+                data: { 
+                    labels, 
+                    datasets: [{
+                        data: fundAccounts.map(a => a.deposit), 
+                        backgroundColor: ['#0F172A', '#334155', '#64748B', '#10B981'],
+                        borderWidth: 0
+                    }] 
+                },
+                options: { 
+                    responsive: true, 
+                    plugins: { legend: { position: 'bottom', labels: { boxWidth: 12, padding: 15 } } }
+                }
+            });
+        }
+
+        function updateCounterAndYields() {
+            const now = Date.now();
+            const delta = Math.min((now - lastTimestamp) / 1000, 2);
+            lastTimestamp = now;
+
+            if (delta > 0 && delta < 5) {
+                fundAccounts.forEach(acc => {
+                    const currentBase = acc.deposit + acc.accumulatedYield;
+                    const microYield = currentBase * (TAXA_DIARIA / 86400) * delta;
+                    acc.accumulatedYield += microYield;
+                });
+
+                renderFundTable();
+
+                if (barChart && pieChart) {
+                    barChart.data.datasets[0].data = fundAccounts.map(a => a.accumulatedYield);
+                    barChart.update('none');
+                }
+            }
+            requestAnimationFrame(updateCounterAndYields);
+        }
+
+        window.addEventListener('DOMContentLoaded', () => {
+            renderFundTable(); 
+            initCharts(); 
+            requestAnimationFrame(updateCounterAndYields);
+        });
+    </script>
+</body>
+</html>
