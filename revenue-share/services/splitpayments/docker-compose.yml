@@ -1,0 +1,181 @@
+version: '3.8'
+
+services:
+  # Split Payment Service
+  split-payment-service:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: split-payment-service
+    restart: unless-stopped
+    ports:
+      - "8446:8446"
+      - "50053:50053"
+    environment:
+      - NODE_ENV=development
+      - SERVICE_NAME=split-payment-service
+      - SERVICE_VERSION=1.0.0
+      - PORT=8446
+      - HOST=0.0.0.0
+      - GRPC_SERVER_PORT=50053
+      - DB_HOST=postgres
+      - DB_PORT=5432
+      - DB_USERNAME=split_user
+      - DB_PASSWORD=split_pass
+      - DB_NAME=revenue_share
+      - DB_SCHEMA=split_payments
+      - DB_SSL=false
+      - DB_SYNC=true
+      - DB_LOGGING=true
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+      - REDIS_DB=3
+      - KAFKA_BROKERS=kafka:9092
+      - KAFKA_CLIENT_ID=split-payment-service
+      - KAFKA_GROUP_ID=split-payment-service-group
+      - LOG_LEVEL=debug
+      - LOG_FORMAT=json
+      - IDEMPOTENCY_ENABLED=true
+      - IDEMPOTENCY_TTL=86400
+      - SPLIT_MAX_RETRIES=5
+      - SPLIT_RETRY_DELAY=5000
+      - DEFAULT_CBS_RATE=0.01
+      - DEFAULT_IBS_RATE=0.02
+      - MULTI_TENANT_ENABLED=true
+      - TENANT_HEADER=X-Consortium-Id
+      - ESCROW_ENABLED=true
+      - ESCROW_ACCOUNT_PREFIX=split-escrow
+      - ESCROW_AUTO_CREATE=true
+      - SPED_ENABLED=true
+      - SPED_AUTO_SEND=false
+      - RF_WEBHOOK_ENABLED=false
+      - ALERT_ENABLED=false
+      - CIRCUIT_BREAKER_ENABLED=true
+      - MTLS_ENABLED=false
+      - RATE_LIMIT_WINDOW_MS=60000
+      - RATE_LIMIT_MAX=1000
+    volumes:
+      - ./logs:/app/logs
+      - ./sped-output:/app/sped-output
+      - ./certs:/app/certs
+    depends_on:
+      - postgres
+      - redis
+      - kafka
+    networks:
+      - split-payment-network
+
+  # PostgreSQL Database
+  postgres:
+    image: postgres:15-alpine
+    container_name: split-payment-postgres
+    restart: unless-stopped
+    environment:
+      - POSTGRES_USER=split_user
+      - POSTGRES_PASSWORD=split_pass
+      - POSTGRES_DB=revenue_share
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+      - ./init-db.sql:/docker-entrypoint-initdb.d/init-db.sql
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U split_user -d revenue_share"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - split-payment-network
+
+  # Redis Cache
+  redis:
+    image: redis:7-alpine
+    container_name: split-payment-redis
+    restart: unless-stopped
+    command: redis-server --appendonly yes
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis-data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - split-payment-network
+
+  # Kafka
+  kafka:
+    image: bitnami/kafka:3.5
+    container_name: split-payment-kafka
+    restart: unless-stopped
+    ports:
+      - "9092:9092"
+      - "9093:9093"
+    environment:
+      - KAFKA_CFG_NODE_ID=0
+      - KAFKA_CFG_PROCESS_ROLES=controller,broker
+      - KAFKA_CFG_LISTENERS=PLAINTEXT://:9092,CONTROLLER://:9093
+      - KAFKA_CFG_LISTENER_SECURITY_PROTOCOL_MAP=CONTROLLER:PLAINTEXT,PLAINTEXT:PLAINTEXT
+      - KAFKA_CFG_CONTROLLER_QUORUM_VOTERS=0@kafka:9093
+      - KAFKA_CFG_CONTROLLER_LISTENER_NAMES=CONTROLLER
+      - KAFKA_CFG_ADVERTISED_LISTENERS=PLAINTEXT://kafka:9092
+      - KAFKA_CFG_OFFSETS_TOPIC_REPLICATION_FACTOR=1
+      - KAFKA_CFG_GROUP_INITIAL_REBALANCE_DELAY_MS=0
+      - KAFKA_CFG_TRANSACTION_STATE_LOG_MIN_ISR=1
+      - KAFKA_CFG_TRANSACTION_STATE_LOG_REPLICATION_FACTOR=1
+      - KAFKA_CFG_NUM_PARTITIONS=3
+      - KAFKA_CFG_DEFAULT_REPLICATION_FACTOR=1
+    volumes:
+      - kafka-data:/bitnami/kafka
+    healthcheck:
+      test: ["CMD", "kafka-topics.sh", "--list", "--bootstrap-server", "kafka:9092"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - split-payment-network
+
+  # Kafka UI (Optional)
+  kafka-ui:
+    image: provectuslabs/kafka-ui:latest
+    container_name: split-payment-kafka-ui
+    restart: unless-stopped
+    ports:
+      - "8080:8080"
+    environment:
+      - KAFKA_CLUSTERS_0_NAME=local
+      - KAFKA_CLUSTERS_0_BOOTSTRAPSERVERS=kafka:9092
+      - KAFKA_CLUSTERS_0_ZOOKEEPER=kafka:2181
+    depends_on:
+      - kafka
+    networks:
+      - split-payment-network
+
+  # PGAdmin (Optional)
+  pgadmin:
+    image: dpage/pgadmin4:latest
+    container_name: split-payment-pgadmin
+    restart: unless-stopped
+    ports:
+      - "5050:80"
+    environment:
+      - PGADMIN_DEFAULT_EMAIL=admin@admin.com
+      - PGADMIN_DEFAULT_PASSWORD=admin
+    volumes:
+      - pgadmin-data:/var/lib/pgadmin
+    depends_on:
+      - postgres
+    networks:
+      - split-payment-network
+
+volumes:
+  postgres-data:
+  redis-data:
+  kafka-data:
+  pgadmin-data:
+
+networks:
+  split-payment-network:
+    driver: bridge

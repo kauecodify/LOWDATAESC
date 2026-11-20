@@ -1,0 +1,29 @@
+{
+  "moduleFileExtensions": [
+    "js",
+    "json",
+    "ts"
+  ],
+  "rootDir": "..",
+  "testRegex": ".*\\.integration\\.spec\\.ts$",
+  "transform": {
+    "^.+\\.(t|j)s$": "ts-jest"
+  },
+  "collectCoverageFrom": [
+    "src/**/*.(t|j)s"
+  ],
+  "coverageDirectory": "../coverage/integration",
+  "testEnvironment": "node",
+  "moduleNameMapper": {
+    "^@/(.*)$": "<rootDir>/src/$1",
+    "^@modules/(.*)$": "<rootDir>/src/modules/$1",
+    "^@common/(.*)$": "<rootDir>/src/common/$1",
+    "^@config/(.*)$": "<rootDir>/src/config/$1",
+    "^@proto/(.*)$": "<rootDir>/src/proto/$1",
+    "^@pool/(.*)$": "<rootDir>/pool/src/$1"
+  },
+  "testTimeout": 30000,
+  "setupFilesAfterEnv": [
+    "<rootDir>/tests/setup.ts"
+  ]
+}

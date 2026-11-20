@@ -1,0 +1,58 @@
+# Dependencies
+node_modules/
+
+# Build output
+dist/
+build/
+
+# Logs
+logs/
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Environment files
+.env
+.env.local
+.env.development
+.env.test
+.env.production
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Test coverage
+coverage/
+
+# Temporary files
+tmp/
+temp/
+
+# Cache
+.cache/
+
+# Certificates (keep references, not actual certs)
+*.crt
+*.key
+*.pem
+
+# Database
+*.sqlite
+*.db
+
+# SPED output
+sped-output/
+
+# Docker
+.docker/
+
+# Kubernetes
+.kube/

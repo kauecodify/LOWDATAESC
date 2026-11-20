@@ -1,0 +1,180 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: split-payment-service-config
+  namespace: revenue-share
+  labels:
+    app: split-payment-service
+    service: revenue-share
+    tier: backend
+    version: v1.0.0
+    tr8-compliant: "true"
+  annotations:
+    description: "Configuration for Split Payment Service"
+    maintainer: "LOWDATAESC Team"
+data:
+  # Service configuration
+  SERVICE_NAME: "split-payment-service"
+  SERVICE_VERSION: "1.0.0"
+  NODE_ENV: "production"
+  PORT: "8446"
+  HOST: "0.0.0.0"
+
+  # Database configuration
+  DB_HOST: "postgres.revenue-share.svc.cluster.local"
+  DB_PORT: "5432"
+  DB_NAME: "revenue_share"
+  DB_SCHEMA: "split_payments"
+  DB_SSL: "true"
+  DB_SYNC: "false"
+  DB_MIGRATIONS: "false"
+  DB_LOGGING: "false"
+
+  # Kafka configuration
+  KAFKA_BROKERS: "kafka.revenue-share.svc.cluster.local:9092"
+  KAFKA_CLIENT_ID: "split-payment-service"
+  KAFKA_GROUP_ID: "split-payment-service-group"
+  KAFKA_TOPIC_PAYMENT_INSTRUCTIONS: "payment-instructions"
+  KAFKA_TOPIC_SPLIT_RESULTS: "split-results"
+  KAFKA_TOPIC_TAX_CALCULATIONS: "tax-calculations"
+  KAFKA_TOPIC_COMPLIANCE_EVENTS: "compliance-events"
+  KAFKA_TOPIC_ESCROW_EVENTS: "escrow-events"
+  KAFKA_TOPIC_WEBHOOK_EVENTS: "webhook-events"
+  KAFKA_TOPIC_DEAD_LETTER: "split-payment-dlq"
+  KAFKA_SSL: "true"
+  KAFKA_RETRIES: "3"
+  KAFKA_RETRY_DELAY: "1000"
+
+  # Redis configuration
+  REDIS_HOST: "redis.revenue-share.svc.cluster.local"
+  REDIS_PORT: "6379"
+  REDIS_DB: "3"
+  REDIS_TTL: "3600"
+
+  # gRPC configuration
+  GRPC_SERVER_HOST: "0.0.0.0"
+  GRPC_SERVER_PORT: "50053"
+  GRPC_SERVER_SSL: "false"
+  LOWDATAESC_GRPC_HOST: "lowdataesc-service.revenue-share.svc.cluster.local"
+  LOWDATAESC_GRPC_PORT: "50051"
+  LOWDATAESC_GRPC_SSL: "true"
+
+  # BACEN configuration
+  BACEN_API_URL: "https://api.bcb.gov.br"
+  BACEN_PIX_URL: "https://pix.bcb.gov.br"
+  BACEN_API_TIMEOUT: "30000"
+  BACEN_SPLIT_ENABLED: "true"
+  BACEN_SPLIT_ENDPOINT: "/split-payment/v1"
+  BACEN_SPLIT_MAX_RETRIES: "3"
+  BACEN_CBS_RATES_ENDPOINT: "/tax-rates/cbs"
+  BACEN_CBS_CACHE_TTL: "3600"
+  BACEN_IBS_RATES_ENDPOINT: "/tax-rates/ibs"
+  BACEN_IBS_CACHE_TTL: "3600"
+
+  # Payment Gateway configuration
+  IUGU_ENABLED: "true"
+  IUGU_API_URL: "https://api.iugu.com/v1"
+  IUGU_SPLIT_ENABLED: "true"
+  IUGU_SPLIT_ENDPOINT: "/payments/split"
+  IUGU_TIMEOUT: "30000"
+
+  ASAAS_ENABLED: "true"
+  ASAAS_API_URL: "https://api.asaas.com/v3"
+  ASAAS_SPLIT_ENABLED: "true"
+  ASAAS_SPLIT_ENDPOINT: "/payments/split"
+  ASAAS_TIMEOUT: "30000"
+
+  EFI_ENABLED: "true"
+  EFI_API_URL: "https://api.efipay.com.br/v1"
+  EFI_SPLIT_ENABLED: "true"
+  EFI_SPLIT_ENDPOINT: "/payments/split"
+  EFI_TIMEOUT: "30000"
+
+  # Escrow configuration
+  ESCROW_ENABLED: "true"
+  ESCROW_ACCOUNT_PREFIX: "split-escrow"
+  ESCROW_AUTO_CREATE: "true"
+  ESCROW_RETENTION_DAYS: "30"
+  ESCROW_ALERT_THRESHOLD: "10000.00"
+
+  # SPED configuration
+  SPED_ENABLED: "true"
+  SPED_VERSION: "2.0"
+  SPED_FILE_PATH: "/app/sped-output"
+  SPED_BATCH_SIZE: "100"
+  SPED_AUTO_SEND: "true"
+
+  # Webhook configuration
+  RF_WEBHOOK_ENABLED: "true"
+  RF_WEBHOOK_URL: "https://webhook.receita.fazenda.gov.br/split-payment"
+  RF_WEBHOOK_TIMEOUT: "30000"
+  RF_WEBHOOK_MAX_RETRIES: "5"
+  RF_WEBHOOK_RETRY_DELAY: "5000"
+  INTERNAL_PAYMENT_CALLBACK: "/api/v1/webhook/payment"
+  INTERNAL_SPLIT_CALLBACK: "/api/v1/webhook/split"
+  INTERNAL_TAX_CALLBACK: "/api/v1/webhook/tax"
+
+  # Split Payment configuration
+  SPLIT_MAX_RETRIES: "5"
+  SPLIT_RETRY_DELAY: "5000"
+  SPLIT_PROCESSING_TIMEOUT: "60000"
+  SPLIT_IDEMPOTENCY_TTL: "86400"
+  SPLIT_STATUS_UPDATE_INTERVAL: "30000"
+  DEFAULT_CBS_RATE: "0.01"
+  DEFAULT_IBS_RATE: "0.02"
+  MULTI_TENANT_ENABLED: "true"
+  TENANT_HEADER: "X-Consortium-Id"
+
+  # Health check configuration
+  HEALTH_LIVENESS_PATH: "/health/live"
+  HEALTH_READINESS_PATH: "/health/ready"
+  HEALTH_TIMEOUT: "5000"
+
+  # Logging configuration
+  LOG_LEVEL: "info"
+  LOG_FORMAT: "json"
+  LOG_MAX_FILES: "10"
+  LOG_MAX_SIZE: "100m"
+  LOG_DIR: "/app/logs"
+  AUDIT_LOG_ENABLED: "true"
+  AUDIT_S3_BUCKET: "lowdataesc-audit-logs"
+  AUDIT_S3_PREFIX: "split-payment"
+  AUDIT_WORM_ENABLED: "true"
+
+  # Circuit breaker configuration
+  CIRCUIT_BREAKER_ENABLED: "true"
+  CIRCUIT_BREAKER_FAILURE_THRESHOLD: "5"
+  CIRCUIT_BREAKER_SUCCESS_THRESHOLD: "2"
+  CIRCUIT_BREAKER_TIMEOUT: "10000"
+  CIRCUIT_BREAKER_RESET_TIMEOUT: "30000"
+
+  # Alert configuration
+  ALERT_ENABLED: "true"
+  AI_OWNER_EMAIL: "ai-owner@lowdataesc.gov.br"
+  AI_OWNER_PHONE: "+5561999999999"
+  AI_OWNER_SLACK: "#split-payment-alerts"
+  ALERT_PAYMENT_FAILURE_THRESHOLD: "3"
+  ALERT_SPLIT_FAILURE_THRESHOLD: "5"
+  ALERT_TAX_FAILURE_THRESHOLD: "3"
+  ALERT_ESCROW_BALANCE: "100000.00"
+
+  # Idempotency configuration
+  IDEMPOTENCY_ENABLED: "true"
+  IDEMPOTENCY_TTL: "86400"
+  IDEMPOTENCY_HEADER: "Idempotency-Key"
+
+  # Security configuration
+  MTLS_ENABLED: "true"
+  ENCRYPTION_ALGORITHM: "aes-256-gcm"
+  ENCRYPTION_IV_LENGTH: "16"
+
+  # Rate limit configuration
+  RATE_LIMIT_WINDOW_MS: "60000"
+  RATE_LIMIT_MAX: "1000"
+
+  # LOWDATAESC configuration
+  LOWDATAESC_API_URL: "https://api.lowdataesc.company.com"
+  LOWDATAESC_API_TIMEOUT: "30000"
+  LOWDATAESC_GRPC_TIMEOUT: "10000"
+  LOWDATAESC_GRPC_MAX_RETRIES: "3"
+  LOWDATAESC_GRPC_RETRY_DELAY: "1000"

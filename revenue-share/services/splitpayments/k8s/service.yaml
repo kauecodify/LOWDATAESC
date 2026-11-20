@@ -1,0 +1,28 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: split-payment-service
+  namespace: revenue-share
+  labels:
+    app: split-payment-service
+    service: revenue-share
+    tier: backend
+    version: v1.0.0
+    tr8-compliant: "true"
+  annotations:
+    description: "Split Payment Service for LOWDATAESC - CBS/IBS Tax Split"
+    maintainer: "LOWDATAESC Team"
+    support: "split-payment@lowdataesc.gov.br"
+spec:
+  selector:
+    app: split-payment-service
+  ports:
+    - name: http
+      port: 8446
+      targetPort: 8446
+      protocol: TCP
+    - name: grpc
+      port: 50053
+      targetPort: 50053
+      protocol: TCP
+  type: ClusterIP

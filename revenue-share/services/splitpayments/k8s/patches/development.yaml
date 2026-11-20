@@ -1,0 +1,31 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: split-payment-service
+  namespace: revenue-share
+spec:
+  replicas: 1
+  strategy:
+    rollingUpdate:
+      maxSurge: 50%
+      maxUnavailable: 25%
+  template:
+    spec:
+      containers:
+        - name: split-payment-service
+          resources:
+            requests:
+              cpu: "50m"
+              memory: "128Mi"
+            limits:
+              cpu: "200m"
+              memory: "256Mi"
+          env:
+            - name: NODE_ENV
+              value: "development"
+            - name: LOG_LEVEL
+              value: "debug"
+            - name: DB_LOGGING
+              value: "true"
+            - name: DB_SYNC
+              value: "true"

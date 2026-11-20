@@ -1,0 +1,21 @@
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: split-payment-service
+  namespace: revenue-share
+  labels:
+    app: split-payment-service
+    service: revenue-share
+    tier: backend
+    version: v1.0.0
+    tr8-compliant: "true"
+  annotations:
+    description: "Pod Disruption Budget for Split Payment Service"
+    maintainer: "LOWDATAESC Team"
+
+spec:
+  minAvailable: 2
+  maxUnavailable: 1
+  selector:
+    matchLabels:
+      app: split-payment-service

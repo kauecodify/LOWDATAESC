@@ -1,0 +1,105 @@
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: split-payment-service
+  namespace: revenue-share
+  labels:
+    app: split-payment-service
+    service: revenue-share
+    tier: backend
+    version: v1.0.0
+    tr8-compliant: "true"
+  annotations:
+    description: "Network Policy for Split Payment Service"
+    maintainer: "LOWDATAESC Team"
+
+spec:
+  podSelector:
+    matchLabels:
+      app: split-payment-service
+  
+  policyTypes:
+    - Ingress
+    - Egress
+  
+  ingress:
+    - from:
+        - podSelector:
+            matchLabels:
+              app: api-gateway
+        - podSelector:
+            matchLabels:
+              app: ingress-nginx
+        - podSelector:
+            matchLabels:
+              app: lowdataesc-service
+      ports:
+        - protocol: TCP
+          port: 8446
+        - protocol: TCP
+          port: 50053
+  
+  egress:
+    - to:
+        - podSelector:
+            matchLabels:
+              app: postgres
+      ports:
+        - protocol: TCP
+          port: 5432
+    - to:
+        - podSelector:
+            matchLabels:
+              app: redis
+      ports:
+        - protocol: TCP
+          port: 6379
+    - to:
+        - podSelector:
+            matchLabels:
+              app: kafka
+      ports:
+        - protocol: TCP
+          port: 9092
+    - to:
+        - podSelector:
+            matchLabels:
+              app: lowdataesc-service
+      ports:
+        - protocol: TCP
+          port: 50051
+    - to:
+        - podSelector:
+            matchLabels:
+              app: bacen-service
+      ports:
+        - protocol: TCP
+          port: 443
+    - to:
+        - podSelector:
+            matchLabels:
+              app: iugu-service
+      ports:
+        - protocol: TCP
+          port: 443
+    - to:
+        - podSelector:
+            matchLabels:
+              app: asaas-service
+      ports:
+        - protocol: TCP
+          port: 443
+    - to:
+        - podSelector:
+            matchLabels:
+              app: efi-service
+      ports:
+        - protocol: TCP
+          port: 443
+    - to:
+        - podSelector:
+            matchLabels:
+              app: receita-federal-service
+      ports:
+        - protocol: TCP
+          port: 443
