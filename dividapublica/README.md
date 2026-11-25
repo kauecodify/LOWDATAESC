@@ -81,7 +81,7 @@ O codigo do modulo nao tem dependencias de runtime; o `package.json` da raiz fix
 
 ### Resultado esperado
 
-- Doze validacoes em quatro etapas, `exit code 0` e a linha final `VALIDACAO E2E COMPLETA: 12/12 validacoes OK, exit code 0`.
+- Trinta validacoes (T1-T30), `exit code 0` e a linha final `VALIDACAO E2E COMPLETA: 30/30 validacoes OK, exit code 0`.
 - Prova SHA-256 final impressa no terminal com id da transacao, valores segregados, ISIN abatido e divida remanescente.
 - Qualquer falha de trava (Zero Trust, boundary matematico, precisao de fracao, whitelist) imprime `VALIDACAO E2E FALHOU` com o motivo e retorna `exit code 1`.
 
@@ -97,6 +97,52 @@ const treasury = new EscrowTreasury();
 const order = treasury.amortizeDebt('FUNDO_AMORTIZACAO_DIVIDA', 'BRSTNCLF1RC4');
 const trail = new AuditTrail('CHAIN-TX-1');
 trail.sealFinalPayload('PROOF_FINAL', { result: split });
+```
+
+## Camada de controle exata e dust
+
+Camada adicional (`src/money.ts`, `src/dust.ts`, `src/invariants.ts`, `src/idempotency.ts`, `src/canonical.ts`, `src/anchor.ts`, `src/saga.ts`, `src/reconcile.ts`, `src/audit-chain.ts`, `src/engine.ts`, `src/factory.ts`) que formaliza conservacao de centavos, atomicidade transacional e prova criptografica anti-reescrita. Toda a aritmetica monetaria e inteira (centavos) e toda fracao e inteira em micro fracoes (1e-6); nenhum float e usado em valor monetario ou fracao.
+
+### Invariantes I1-I8
+
+| Id | Invariante |
+|----|------------|
+| I1 | Σ buckets === valor bruto (conservacao do split) |
+| I2 | todo bucket e inteiro |
+| I3 | todo bucket e nao-negativo |
+| I4 | `bucketAmort * 1e6 % puCents === 0`, ou `policy.onBelowMinFraction === 'ACCUMULATE'` |
+| I5 | `fracaoMicro <= estoqueMicro` (estoque suficiente) |
+| I6 | escrow zerado apos a baixa do titulo |
+| I7 | `dustApplied + amortizadoCents === pagoAmortCents` (conservacao do dust) |
+| I8 | cadeia de auditoria canonica verifica integralmente |
+
+### Politica de dust (`DustPolicy`)
+
+O ledger de dust e contabil, em dupla entrada, por `(tenant, ISIN)`: cada evento gera lancamentos `CREDIT`/`DEBIT` encadeados por hash, com invariantes `balance(isin) === Σ creditos − Σ debitos` e `balance(isin) >= 0` provaveis a partir de `history()`.
+
+- `minFractionMicro`: menor fracao aceitavel (default `1`, ou seja 0.000001 de titulo).
+- `onResidual: 'FAIL' | 'ACCUMULATE'`: o que fazer se o split deixar residuo (nunca deve ocorrer com maior resto deterministico).
+- `onBelowMinFraction: 'ACCUMULATE' | 'RETURN_TO_ORIGIN'`: dust de fracao (truncamento em `PU` nao divisivel) e acumulado no ledger ou devolvido a origem.
+- Exemplos: `PU = 1.333.333` centavos e bucket de 750.000 centavos gera fracao `5625` micro (`0.005625`), consumindo `7.499` centavos e retendo `1` centavo de dust (`FRACTION_TRUNCATION`); `PU > bruto` gera dust de `1` centavo com fracao truncada a 4 micro; `PU = 1` centavo com estoque `1e12` micro nao gera dust algum.
+
+### Canonicalizacao e ancora
+
+- `CANON_VERSION = 'v1'` e `GENESIS_HASH = 0x0000000000000000000000000000000000000000000000000000000000000000` sao constantes publicadas (fonte: `src/canonical.ts`).
+- Regras C1-C5: chaves em ordem lexicografica em todos os niveis, apenas inteiros para dinheiro/fracao, UTF-8 sem espacos, separador `prevHash ‖ payload = 0x00`, genesis verificado no bootstrap.
+- Golden vector congelado: `hashRecord(GENESIS_HASH, {"amountCents":10000000,"bps":[7500,1700,750,50],"isin":"BRSTNCLF1RC4","op":"GOLDEN_VECTOR_V1","tenant":"GOV-BR-STN-01"}) = 0xca79069e7520156e5778bc039525a67efc8e363958d0180610567945cab71a38`.
+- Anti-reescrita total: `assertAnchored` compara a cabeca da cadeia contra a `Anchor` publicada (`InMemoryAnchor`/`HsmAnchorStub`); reescrita integral com hashes recomputeados verifica internamente, mas nunca bate com a ancora externa.
+
+### Codigo do motor (`EngineCode`)
+
+`OK`, `BLOCKED_WHITELABEL`, `ABORTED_ZERO_TRUST`, `ESCROW_PRECISION`, `INSUFFICIENT_STOCK`, `AUDIT_CHAIN_BROKEN`, `DUST_INSUFFICIENT`, `INVARIANT_VIOLATION`, `IDEMPOTENT_REPLAY`, `UNANCHORED_CHAIN`, `NON_INTEGER_CENTS`, `NON_INTEGER_MICRO`, `NEGATIVE_BALANCE`, `INVALID_BPS_SUM`, `SAGA_STEP_FAILED`. Toda recusa e registrada na cadeia via `appendRejection` (regra R6).
+
+### Como executar os testes
+
+```bash
+npx tsc --noEmit -p tsconfig.json                    # AC1: 0 erros (strict)
+npx ts-node dividapublica/tests/validate-operation.ts # T1-T30 (npm run validate:dividapublica)
+npx ts-node dividapublica/tests/money.test.ts        # fuzz 10.000/10.000 (npm run test:money)
+npx ts-node dividapublica/tests/dust.test.ts         # conservacao 1.000/1.000 (npm run test:dust)
 ```
 
 ## Compliance
