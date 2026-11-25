@@ -286,3 +286,18 @@ IP/Compliance Docs,,docs/threat-model.md", "compliance/iso27001-controls/
 
 *"Dados protegidos. Valor escalonado. Confiança institucional."*
 
+
+---
+
+# Modulo Divida Publica - Split Payment B2G
+
+O modulo `dividapublica/` valida a operacao de Split Payment com Amortizacao Parcial da Divida Publica em Tempo Real lastreada em Titulos Publicos (fluxo D-0), com travas Zero Trust, custodia segregada escrow (Camada 6), trilha de auditoria SHA-256 encadeada e whitelabel B2G declarativo (`dividapublica/whitelabel/`). Documentacao tecnica em `dividapublica/README.md`.
+
+## Manual de instalacao (modulo Divida Publica)
+
+1. Instale Node.js 18 ou superior (recomendado 22 LTS).
+2. Na raiz do repositorio, instale a toolchain fixada (unico passo de setup): `npm install`.
+3. Execute a validacao E2E: `npx ts-node dividapublica/tests/validate-operation.ts` (ou `npm run validate:dividapublica`).
+4. Resultado esperado: `VALIDACAO E2E COMPLETA: 12/12 validacoes OK, exit code 0`; qualquer trava violada retorna `exit code 1`.
+
+O codigo do modulo nao tem dependencias de runtime; o `package.json` da raiz fixa apenas `ts-node` e `typescript` para execucao tipada.

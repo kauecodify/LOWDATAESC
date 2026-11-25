@@ -1,0 +1,15 @@
+{
+  "name": "lowdataesc",
+  "version": "2.0.0",
+  "private": true,
+  "type": "commonjs",
+  "description": "LOWDATAESC - Plataforma de Dados Escalonados com Custodia Inteligente (Escrow), Zero Trust Security",
+  "scripts": {
+    "validate:dividapublica": "ts-node dividapublica/tests/validate-operation.ts"
+  },
+  "devDependencies": {
+    "@types/node": "^22.0.0",
+    "ts-node": "10.9.2",
+    "typescript": "5.8.3"
+  }
+}
