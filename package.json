@@ -5,7 +5,9 @@
   "type": "commonjs",
   "description": "LOWDATAESC - Plataforma de Dados Escalonados com Custodia Inteligente (Escrow), Zero Trust Security",
   "scripts": {
-    "validate:dividapublica": "ts-node dividapublica/tests/validate-operation.ts"
+    "validate:dividapublica": "ts-node dividapublica/tests/validate-operation.ts",
+    "test:money": "ts-node dividapublica/tests/money.test.ts",
+    "test:dust": "ts-node dividapublica/tests/dust.test.ts"
   },
   "devDependencies": {
     "@types/node": "^22.0.0",

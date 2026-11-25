@@ -298,6 +298,27 @@ O modulo `dividapublica/` valida a operacao de Split Payment com Amortizacao Par
 1. Instale Node.js 18 ou superior (recomendado 22 LTS).
 2. Na raiz do repositorio, instale a toolchain fixada (unico passo de setup): `npm install`.
 3. Execute a validacao E2E: `npx ts-node dividapublica/tests/validate-operation.ts` (ou `npm run validate:dividapublica`).
-4. Resultado esperado: `VALIDACAO E2E COMPLETA: 12/12 validacoes OK, exit code 0`; qualquer trava violada retorna `exit code 1`.
+4. Resultado esperado: `VALIDACAO E2E COMPLETA: 30/30 validacoes OK, exit code 0`; qualquer trava violada retorna `exit code 1`.
+5. Testes unitarios adicionais: `npm run test:money` (fuzz de conservacao de centavos) e `npm run test:dust` (conservacao do ledger de dust).
+
+### Checklist Parte III (camada de controle exata) - status
+
+| Item | Conteudo | Status |
+|------|----------|--------|
+| 1 | Invariantes I1-I8 formalizadas (`src/invariants.ts`) | Fechado |
+| 2 | Fuzz 10.000 valores de conservacao (`tests/money.test.ts`, T13) | Fechado |
+| 3 | Casos de borda (bruto 0/1, PU 1, PU > bruto, estoque exato, T29) | Fechado |
+| 4 | Fronteira transacional via saga com compensacao (`src/saga.ts`) | Fechado |
+| 5 | Injecao de falha sem estado orfao (T18, T19, journal de pendencias) | Fechado |
+| 6 | Idempotencia sequencial e paralela (`src/idempotency.ts`, T15, T16) | Fechado |
+| 7 | Replay adversarial com key estavel (T17) | Fechado |
+| 8 | Canonicalizacao C1-C5 (`src/canonical.ts`) | Fechado |
+| 9 | Recomputacao cega do selo (T21) | Fechado |
+| 10 | Sensibilidade de 1 bit / tamper isolado (T20, T22) | Fechado |
+| 11 | Ancora externa anti-reescrita (`src/anchor.ts`, T23, T24) | Fechado |
+| 12 | Conciliacao diaria R1-R7 (`src/reconcile.ts`, T25, T26) | Fechado |
+| 13 | Integracao real (Selic/STN, HSM, publicacao DOU) | Aberto - fora do escopo |
+
+Relatorio de aceitacao completo: `dividapublica/docs/RELATORIO-CAMADA-CONTROLE.md`.
 
 O codigo do modulo nao tem dependencias de runtime; o `package.json` da raiz fixa apenas `ts-node` e `typescript` para execucao tipada.

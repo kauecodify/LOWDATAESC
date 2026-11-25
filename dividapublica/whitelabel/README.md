@@ -41,3 +41,4 @@ O codigo do modulo nao tem dependencias de npm; o `package.json` da raiz fixa ap
 
 - `WHITELIST_OK`: operacao e ISIN autorizados na whitelist do tenant.
 - `WHITELIST_DENIED`: operacao, ISIN ou travas fora da whitelist bloqueiam antes de qualquer movimentacao.
+- O ledger de dust (centavos restantes de truncamento de fracao) e isolado por `(tenant, ISIN)`: cada tenant mantem saldo e historico encadeado proprios, e o `EngineCode` de recusa e registrado na cadeia do tenant emissor.
