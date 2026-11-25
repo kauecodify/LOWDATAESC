@@ -41,14 +41,13 @@ export function canonicalJson(v: unknown): string {
 }
 
 // C4: separacao prev_hash ‖ payload por byte 0x00 (SEP)
+// O recordHash retornado é '0x' + digest hex lowercase; o formato do prevHash
+// é validado (0x + 64 hex, ou GENESIS_HASH) para impedir encadeamento misto.
 export function hashRecord(prevHash: string, payload: unknown): string {
-  if (typeof prevHash !== 'string' || prevHash.length < 64) {
-    throw new CanonicalError('prevHash invalido: ' + String(prevHash));
+  if (typeof prevHash !== 'string' || prevHash.length !== 66 || /^0x[0-9a-f]{64}$/.test(prevHash) === false) {
+    throw new CanonicalError('prevHash fora do formato 0x + 64 hex: ' + String(prevHash));
   }
-  if (prevHash !== GENESIS_HASH && prevHash.indexOf('0x') !== 0) {
-    throw new CanonicalError("prevHash fora do formato '0x' + hex: " + prevHash);
-  }
-  return sha256Hex(prevHash + SEP + canonicalJson(payload));
+  return '0x' + sha256Hex(prevHash + SEP + canonicalJson(payload));
 }
 
 export interface ChainRecordLike {

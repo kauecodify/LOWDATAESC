@@ -161,7 +161,7 @@ export function buildSplitAmortSaga(deps: {
   amort: AmortizationDep;
   audit: AuditDep;
   dust: DustDep;
-}): Saga<SplitAmortCtx> {
+}, journalInput?: Journal): Saga<SplitAmortCtx> {
   const escrowFullDebit = function (ctx: SplitAmortCtx): Cents {
     const belowMin = ctx.fractionMicro < ctx.policy.minFractionMicro;
     if (belowMin && ctx.policy.onBelowMinFraction === 'RETURN_TO_ORIGIN') {
@@ -187,7 +187,7 @@ export function buildSplitAmortSaga(deps: {
     {
       name: 'escrow.credit',
       do: function (ctx) {
-        deps.escrow.credit(ctx.escrowAccount, ctx.amortBucket);
+        if (ctx.amortBucket > 0) deps.escrow.credit(ctx.escrowAccount, ctx.amortBucket);
         return Promise.resolve();
       },
       undo: function (ctx) {
@@ -288,5 +288,5 @@ export function buildSplitAmortSaga(deps: {
       }
     }
   ];
-  return new Saga<SplitAmortCtx>(steps, new InMemoryJournal());
+  return new Saga<SplitAmortCtx>(steps, journalInput || new InMemoryJournal());
 }

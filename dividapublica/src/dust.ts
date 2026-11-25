@@ -18,6 +18,7 @@ export interface DustEntry {
   createdAt: string;
   prevHash: string;
   recordHash: string;
+  direction?: 'CREDIT' | 'DEBIT';
 }
 
 export class InsufficientDust extends Error {
@@ -84,7 +85,6 @@ export interface DustLedger {
 // Ledger de dupla entrada: cada evento gera 2 lançamentos (contra-partida débito/crédito da conta dust).
 export class DustLedgerImpl implements DustLedger {
   private readonly entriesByScope = new Map<string, DustEntry[]>();
-  private readonly balanceByScope = new Map<string, number>();
   private readonly lastHashByScope = new Map<string, string>();
 
   constructor(private readonly clock: () => string = function () { return new Date().toISOString(); }) {}
@@ -95,54 +95,69 @@ export class DustLedgerImpl implements DustLedger {
 
   credit(entry: DustCreditInput): DustEntry {
     assertCents(entry.amountCents);
-    if (entry.amountCents === 0) throw new InsufficientDust(entry.isin, 0, 0);
-    const scope = this.scope(entry.tenant, entry.isin);
+    if (entry.amountCents === 0) throw new InsufficientDust(entry.isin, 0, this.balance(entry.isin));
+    return this.post(entry.tenant, entry.isin, entry.reason, entry.amountCents, entry.refTxId, 'CREDIT');
+  }
+
+  private post(tenant: string, isin: string, reason: DustReason, amountCents: Cents, refTxId: string | null, direction: 'CREDIT' | 'DEBIT'): DustEntry {
+    const scope = this.scope(tenant, isin);
     const prevHash = this.lastHashByScope.get(scope) || GENESIS_HASH;
     const createdAt = this.clock();
     const id = newUlid(Date.parse(createdAt) || Date.now());
     const hashedPayload = {
       id: id,
-      isin: entry.isin,
-      reason: entry.reason,
-      refTxId: entry.refTxId,
-      tenant: entry.tenant,
-      amountCents: entry.amountCents,
-      createdAt: createdAt
+      isin: isin,
+      reason: reason,
+      refTxId: refTxId,
+      tenant: tenant,
+      amountCents: amountCents,
+      createdAt: createdAt,
+      direction: direction
     };
     const full: DustEntry = {
       id: id,
-      tenant: entry.tenant,
-      isin: entry.isin,
-      reason: entry.reason,
-      amountCents: entry.amountCents,
-      refTxId: entry.refTxId,
+      tenant: tenant,
+      isin: isin,
+      reason: reason,
+      amountCents: amountCents,
+      refTxId: refTxId,
       createdAt: createdAt,
       prevHash: prevHash,
-      recordHash: hashRecord(prevHash, hashedPayload)
+      recordHash: hashRecord(prevHash, hashedPayload),
+      direction: direction
     };
     this.lastHashByScope.set(scope, full.recordHash);
     const list = this.entriesByScope.get(scope) || [];
     list.push(full);
     this.entriesByScope.set(scope, list);
-    this.balanceByScope.set(scope, addCents(assertCents(this.balanceByScope.get(scope) || 0), full.amountCents));
     return full;
   }
 
   debit(isin: string, amountCents: Cents, reason: DustReason, refTxId?: string, tenant: string = 'GOV-BR-STN-01'): DustEntry {
     assertCents(amountCents);
     if (amountCents === 0) throw new InsufficientDust(isin, 0, this.balance(isin));
-    const scope = this.scope(tenant, isin);
-    const available = this.balanceByScope.get(scope) || 0;
+    const available = this.balanceOfScope(tenant, isin);
     if (amountCents > available) throw new InsufficientDust(isin, amountCents, available);
-    const entry = this.credit({ tenant: tenant, isin: isin, reason: reason, amountCents: amountCents as Cents, refTxId: refTxId || null });
-    this.balanceByScope.set(scope, subCents(assertCents(this.balanceByScope.get(scope) || 0), amountCents));
-    return entry;
+    return this.post(tenant, isin, reason, amountCents as Cents, refTxId || null, 'DEBIT');
+  }
+
+  // INVARIANTE ID: balance === Σ credit.amount − Σ debit.amount
+  balanceOfScope(tenant: string, isin: string): Cents {
+    let total = 0;
+    for (const e of this.entriesByScope.get(this.scope(tenant, isin)) || []) {
+      total = e.direction === 'DEBIT' ? total - e.amountCents : total + e.amountCents;
+    }
+    return assertCents(total);
   }
 
   balance(isin: string): Cents {
     let total = 0;
-    this.balanceByScope.forEach(function (v, scope) {
-      if (scope.indexOf('|' + isin, scope.length - isin.length - 1) !== -1) total += v;
+    this.entriesByScope.forEach(function (list, scope) {
+      if (scope.indexOf('|' + isin, scope.length - isin.length - 1) !== -1) {
+        for (const e of list) {
+          total = e.direction === 'DEBIT' ? total - e.amountCents : total + e.amountCents;
+        }
+      }
     });
     return assertCents(total);
   }
@@ -155,10 +170,6 @@ export class DustLedgerImpl implements DustLedger {
       }
     });
     return out;
-  }
-
-  balanceOfScope(tenant: string, isin: string): Cents {
-    return assertCents(this.balanceByScope.get(this.scope(tenant, isin)) || 0);
   }
 }
 
